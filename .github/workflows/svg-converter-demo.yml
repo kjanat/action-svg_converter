@@ -1,5 +1,9 @@
 name: 🎨 SVG Converter Pro - Enhanced Demo
 
+permissions:
+  contents: read
+  actions: write
+
 on:
   push:
     paths:
