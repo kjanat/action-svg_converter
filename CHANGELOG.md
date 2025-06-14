@@ -7,10 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.6] - 2025-06-15
+
 ### Added
 
 - Version sync scripts (Bash and PowerShell) to synchronize version numbers across all project files
 - Scripts directory with comprehensive documentation
+- Inkscape support for highest quality SVG to PNG conversion
+- Enhanced ICO generation using high-resolution intermediate PNG for better quality
 
 ### Changed
 
@@ -18,6 +22,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated README to reflect new repository name and usage instructions
 - Updated all README.md usage examples to use correct repository reference (`kjanat/svg-converter-action@v1.0.6`)
 - Fixed action path references from local `./.github/actions/svg-converter` to proper marketplace format
+- Prioritized Inkscape over other SVG converters for superior rendering quality
+- ICO conversion now uses highest available resolution as intermediate PNG for better quality
+- Enhanced conversion logging with converter type and file size information
 
 ### Fixed
 
@@ -26,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - GitHub Actions workflow artifact uploads (each demo job now properly uploads its generated files)
 - TypeScript component demo output and file detection logic
 - Missing artifacts issue where generated files weren't being uploaded to GitHub
+- ICO file quality by using two-step conversion process (SVG → PNG → ICO)
 
 ### Removed
 
@@ -121,7 +129,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic cleanup of temporary files
 - Enhanced documentation and examples
 
-[unreleased]: https://github.com/kjanat/svg-converter-action/compare/v1.0.5...HEAD
+[unreleased]: https://github.com/kjanat/svg-converter-action/compare/v1.0.6...HEAD
+[1.0.6]: https://github.com/kjanat/svg-converter-action/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/kjanat/svg-converter-action/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/kjanat/svg-converter-action/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/kjanat/svg-converter-action/compare/v1.0.2...v1.0.3

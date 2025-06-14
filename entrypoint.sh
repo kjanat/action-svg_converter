@@ -15,7 +15,7 @@
 set -euo pipefail
 
 # Version and script info
-readonly VERSION="1.0.5"
+readonly VERSION="1.0.6"
 SCRIPT_NAME="$(basename "$0")"
 # SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -322,9 +322,12 @@ check_dependencies() {
     local missing_deps=()
     log_step "Checking dependencies..."
 
-    # Check for SVG conversion capability
-    if command -v rsvg-convert >/dev/null 2>&1; then
-        log_info "✓ rsvg-convert found (preferred)"
+    # Check for SVG conversion capability (prioritize Inkscape)
+    if command -v inkscape >/dev/null 2>&1; then
+        log_info "✓ Inkscape found (preferred - highest quality)"
+        SVG_CONVERTER="inkscape"
+    elif command -v rsvg-convert >/dev/null 2>&1; then
+        log_info "✓ rsvg-convert found"
         SVG_CONVERTER="rsvg-convert"
     elif command -v magick >/dev/null 2>&1; then
         log_info "✓ ImageMagick v7+ found"
@@ -343,7 +346,7 @@ check_dependencies() {
             log_warn "ImageMagick may not have full SVG support"
         fi
     else
-        missing_deps+=("imagemagick or librsvg")
+        missing_deps+=("inkscape, imagemagick, or librsvg")
     fi
 
     # Check other dependencies based on requested formats
@@ -384,9 +387,15 @@ convert_svg_to_png() {
     local width="$3"
     local height="$4"
 
-    log_debug "Converting $input_svg to $output_png (${width}x${height})"
+    log_debug "Converting $input_svg to $output_png (${width}x${height}) using $SVG_CONVERTER"
 
-    if [[ "$SVG_CONVERTER" == "rsvg-convert" ]]; then
+    if [[ "$SVG_CONVERTER" == "inkscape" ]]; then
+        # Inkscape provides the highest quality SVG rendering
+        if ! inkscape --export-type=png --export-width="$width" --export-height="$height" --export-filename="$output_png" "$input_svg"; then
+            log_error "Failed to convert SVG to PNG using Inkscape"
+            return 1
+        fi
+    elif [[ "$SVG_CONVERTER" == "rsvg-convert" ]]; then
         if ! rsvg-convert -w "$width" -h "$height" "$input_svg" -o "$output_png"; then
             log_error "Failed to convert SVG to PNG using rsvg-convert"
             return 1
@@ -411,46 +420,48 @@ convert_svg_to_png() {
         log_error "Generated PNG file is missing or empty: $output_png"
         return 1
     fi
+
+    log_debug "Successfully converted to PNG: $output_png ($(stat -c%s "$output_png" 2>/dev/null || echo "unknown") bytes)"
 }
 
 # Convert SVG to ICO format
 convert_to_ico() {
     local base_name="$1"
     local output_file="${OUTPUT_DIR}${base_name}.ico"
-    local tmp_png="${TEMP_DIR}/${base_name}_temp.png"
+    local tmp_png="${TEMP_DIR}/${base_name}_temp_ico.png"
 
     log_step "Converting to ICO format..."
 
     # Add temp file to cleanup list
     TEMP_FILES+=("$tmp_png")
 
-    # Convert SVG to high-res PNG first
-    if ! convert_svg_to_png "$SVG_PATH" "$tmp_png" 256 256; then
+    # Convert SVG to high-resolution PNG first (using highest resolution for best ICO quality)
+    local max_ico_size
+    max_ico_size=$(echo "$ICO_SIZES" | tr ',' '\n' | sort -nr | head -n1)
+    max_ico_size=${max_ico_size:-256}  # Default to 256 if parsing fails
+    
+    log_debug "Creating high-res intermediate PNG for ICO: ${max_ico_size}x${max_ico_size}"
+    if ! convert_svg_to_png "$SVG_PATH" "$tmp_png" "$max_ico_size" "$max_ico_size"; then
+        log_error "Failed to create intermediate PNG for ICO conversion"
         return 1
     fi
 
-    # Create multi-resolution ICO using appropriate ImageMagick command
-    if [[ "$SVG_CONVERTER" == "magick" ]]; then
+    # Create multi-resolution ICO using ImageMagick (PNG → ICO provides better quality than direct SVG → ICO)
+    if command -v magick >/dev/null 2>&1; then
+        log_debug "Using ImageMagick v7+ for ICO creation with sizes: $ICO_SIZES"
         if ! magick "$tmp_png" -define icon:auto-resize="$ICO_SIZES" "$output_file"; then
             log_error "Failed to create ICO file using ImageMagick v7+"
             return 1
         fi
-    else
-        # Use convert for ImageMagick v6 or when rsvg-convert is primary but ImageMagick is available
-        if command -v magick >/dev/null 2>&1; then
-            if ! magick "$tmp_png" -define icon:auto-resize="$ICO_SIZES" "$output_file"; then
-                log_error "Failed to create ICO file using ImageMagick v7+"
-                return 1
-            fi
-        elif command -v convert >/dev/null 2>&1; then
-            if ! convert "$tmp_png" -define icon:auto-resize="$ICO_SIZES" "$output_file"; then
-                log_error "Failed to create ICO file using ImageMagick v6"
-                return 1
-            fi
-        else
-            log_error "No ImageMagick installation found for ICO conversion"
+    elif command -v convert >/dev/null 2>&1; then
+        log_debug "Using ImageMagick v6 for ICO creation with sizes: $ICO_SIZES"
+        if ! convert "$tmp_png" -define icon:auto-resize="$ICO_SIZES" "$output_file"; then
+            log_error "Failed to create ICO file using ImageMagick v6"
             return 1
         fi
+    else
+        log_error "No ImageMagick installation found for ICO conversion"
+        return 1
     fi
 
     CREATED_FILES+=("$output_file")

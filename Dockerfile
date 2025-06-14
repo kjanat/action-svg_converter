@@ -1,7 +1,7 @@
 FROM node:24-alpine
 
 # Build argument for version (can be overridden during build)
-ARG VERSION=1.0.5
+ARG VERSION=1.0.6
 
 # Set metadata
 LABEL maintainer="poo-tracker"
@@ -19,7 +19,8 @@ RUN apk add --no-cache \
     bash \
     jq \
     coreutils \
-    findutils
+    findutils \
+    inkscape
 
 # Install Node.js dependencies globally with specific compatible version
 RUN npm install -g @svgr/cli@8.1.0
