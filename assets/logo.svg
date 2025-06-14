@@ -1,4 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1024px;" height="1024px;" viewBox="0 0 1024 1024">
-	<path fill="#7B4EFF" d="M0 0h1024v1024H0z"/>
-	<text x="50%" y="55%" text-anchor="middle" dominant-baseline="middle" font-family="Arial, sans-serif" font-weight="bold" font-size="450" fill="#FFF">SC</text>
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <style type="text/css">
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&amp;display=swap');
+
+            text {
+                font-family: 'Noto Sans', 'Segoe UI', Arial, sans-serif;
+                font-optical-sizing: auto;
+                font-weight: 400;
+                font-style: normal;
+                font-variation-settings: 'wdth' 100;
+            }
+
+            .logo-text {
+                text-anchor: start;
+                fill: #fff;
+            }
+
+            .logo-text .bold {
+                font-weight: 700;
+                font-size: 80px;
+            }
+
+            .logo-text .medium.italic {
+                font-weight: 500;
+                font-style: italic;
+                font-size: 60px;
+            }
+        </style>
+    </defs>
+    <path fill="#7B4EFF" d="M0 0h1024v1024H0z" />
+    <text xml:space="preserve" class="logo-text">
+        <tspan x="80" y="450" class="bold">SVG Converter</tspan>
+        <tspan x="80" y="550" class="bold">@github</tspan>
+        <tspan x="80" y="650" class="medium italic">kjanat/svg-converter-action</tspan>
+    </text>
 </svg>

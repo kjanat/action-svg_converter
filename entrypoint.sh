@@ -438,8 +438,8 @@ convert_to_ico() {
     # Convert SVG to high-resolution PNG first (using highest resolution for best ICO quality)
     local max_ico_size
     max_ico_size=$(echo "$ICO_SIZES" | tr ',' '\n' | sort -nr | head -n1)
-    max_ico_size=${max_ico_size:-256}  # Default to 256 if parsing fails
-    
+    max_ico_size=${max_ico_size:-256} # Default to 256 if parsing fails
+
     log_debug "Creating high-res intermediate PNG for ICO: ${max_ico_size}x${max_ico_size}"
     if ! convert_svg_to_png "$SVG_PATH" "$tmp_png" "$max_ico_size" "$max_ico_size"; then
         log_error "Failed to create intermediate PNG for ICO conversion"
