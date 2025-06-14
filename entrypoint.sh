@@ -78,7 +78,9 @@ log_step() {
 }
 
 log_debug() {
-    [[ "${DEBUG:-false}" == "true" ]] && echo -e "${BLUE}🐛 DEBUG: $1${NC}" >&2
+    if [[ "${DEBUG:-false}" == "true" ]]; then
+        echo -e "${BLUE}🐛 DEBUG: $1${NC}" >&2
+    fi
 }
 
 # Show help
@@ -119,11 +121,18 @@ EOF
 get_input() {
     local key="$1"
     local default_value="${2:-}"
-    # GitHub Actions converts hyphens to underscores in environment variables
-    local env_var="INPUT_${key//-/_}"
 
-    # Use parameter expansion to safely get the value
-    local value="${!env_var:-}"
+    # Support both hyphenated and underscored env names
+    local env_var_underscore="INPUT_${key//-/_}"
+    local env_var_hyphen="INPUT_${key}"
+
+    # Retrieve value from either form (using printenv for hyphenated names)
+    local value=""
+    if [[ -n "${!env_var_underscore:-}" ]]; then
+        value="${!env_var_underscore}"
+    else
+        value="$(printenv "$env_var_hyphen" 2>/dev/null || true)"
+    fi
     echo "${value:-$default_value}"
 }
 
@@ -499,7 +508,7 @@ convert_to_react() {
     fi
 
     # Convert SVG to React component
-    if ! svgr "${svgr_args[@]}" --out-file "$output_file" "$SVG_PATH"; then
+    if ! svgr "${svgr_args[@]}" "$SVG_PATH" > "$output_file"; then
         log_error "Failed to create React component"
         return 1
     fi
@@ -549,7 +558,7 @@ convert_to_react_native() {
     fi
 
     # Convert SVG to React Native component
-    if ! svgr "${svgr_args[@]}" --out-file "$output_file" "$SVG_PATH"; then
+    if ! svgr "${svgr_args[@]}" "$SVG_PATH" > "$output_file"; then
         log_error "Failed to create React Native component"
         return 1
     fi
