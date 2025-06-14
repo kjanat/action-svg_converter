@@ -80,6 +80,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.basic.outputs.summary }}" >> $GITHUB_STEP_SUMMARY
 
+      - name: Upload basic conversion artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: basic-conversion-outputs
+          path: dist/basic/
+          retention-days: 7
+
   # Demonstrate high-performance PNG generation
   performance-demo:
     name: ⚡ High-Performance PNG Generation
@@ -107,6 +114,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "${{ steps.performance.outputs.summary }}" >> $GITHUB_STEP_SUMMARY
 
+      - name: Upload performance demo artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-demo-outputs
+          path: dist/performance/
+          retention-days: 7
+
   # Demonstrate TypeScript React components
   typescript-demo:
     name: 🔷 TypeScript React Components
@@ -131,9 +145,32 @@ jobs:
       - name: Show TypeScript component
         run: |
           echo "### 🔷 TypeScript Components Generated" >> $GITHUB_STEP_SUMMARY
-          echo "\`\`\`typescript" >> $GITHUB_STEP_SUMMARY
-          head -20 dist/typescript/AppLogo.tsx || echo "// Component preview not available" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.typescript.outputs.summary }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Generated Files:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`json" >> $GITHUB_STEP_SUMMARY
+          echo '${{ steps.typescript.outputs.files-created }}' | jq . >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**React Component Preview:**" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`typescript" >> $GITHUB_STEP_SUMMARY
+          if [ -f "dist/typescript/AppLogo.tsx" ]; then
+            head -20 dist/typescript/AppLogo.tsx >> $GITHUB_STEP_SUMMARY
+          elif [ -f "dist/typescript/AppLogo.ts" ]; then
+            head -20 dist/typescript/AppLogo.ts >> $GITHUB_STEP_SUMMARY
+          else
+            echo "// Component files generated successfully" >> $GITHUB_STEP_SUMMARY
+            ls -la dist/typescript/ >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload TypeScript demo artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: typescript-demo-outputs
+          path: dist/typescript/
+          retention-days: 7
 
   # Demonstrate favicon generation
   favicon-demo:
@@ -187,6 +224,13 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**HTML snippet generated:** \`dist/favicon/favicon-snippet.html\`" >> $GITHUB_STEP_SUMMARY
 
+      - name: Upload favicon demo artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: favicon-demo-outputs
+          path: dist/favicon/
+          retention-days: 7
+
   # Demonstrate error handling and validation
   security-demo:
     name: 🛡️ Security & Validation Demo
@@ -225,6 +269,13 @@ jobs:
           else
             echo "- ❌ Invalid input not properly rejected" >> $GITHUB_STEP_SUMMARY
           fi
+
+      - name: Upload security demo artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-demo-outputs
+          path: dist/security/
+          retention-days: 7
 
   # Create summary of all results
   summary:
@@ -271,10 +322,3 @@ jobs:
           echo "- **Error Recovery**: 90% faster failure detection and reporting" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "✨ **SVG Converter v$(tr -d '\n\r ' <./VERSION)** - Enterprise-grade SVG conversion! 🚀" >> $GITHUB_STEP_SUMMARY
-
-      - name: Archive all generated assets
-        uses: actions/upload-artifact@v4
-        with:
-          name: svg-converter-demo-outputs
-          path: dist/
-          retention-days: 7

@@ -23,6 +23,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Docker LABEL version command substitution (replaced invalid `$(cat /tmp/VERSION)` with proper ARG/LABEL pattern)
 - Version mismatches across project files (now all synced to v1.0.6)
+- GitHub Actions workflow artifact uploads (each demo job now properly uploads its generated files)
+- TypeScript component demo output and file detection logic
+- Missing artifacts issue where generated files weren't being uploaded to GitHub
 
 ### Removed
 
