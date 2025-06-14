@@ -266,8 +266,16 @@ Perfect for maintaining consistent, high-quality branding assets across web, mob
 
 ## 📈 Changelog
 
-### v2.0.0 (Latest)
+### v1.0.1 (Latest)
 
+- 🔧 Fixed GitHub Actions workflow path references
+- ✅ Corrected action usage from `./.github/actions/svg-converter` to `./`
+- 📍 Resolved "Can't find action.yml" errors in workflow execution
+- 🎯 Improved workflow reliability and execution success rate
+
+### v1.0.0
+
+- 🎉 Initial release with basic SVG conversion capabilities
 - ✨ Added parallel processing for PNG generation
 - 🔒 Enhanced security with input validation and path protection
 - 🛡️ Added comprehensive error handling and recovery
@@ -276,10 +284,6 @@ Perfect for maintaining consistent, high-quality branding assets across web, mob
 - 📊 Improved logging and progress indicators
 - 🧹 Automatic cleanup of temporary files
 - 📝 Enhanced documentation and examples
-
-### v1.0.0
-
-- 🎉 Initial release with basic SVG conversion capabilities
 
 ## 🤝 Contributing
 

@@ -28,7 +28,7 @@ jobs:
 
       - name: Convert SVG to all formats
         id: basic
-        uses: ./.github/actions/svg-converter
+        uses: ./
         with:
           svg-path: ${{ github.event.inputs.svg_file || 'assets/logo.svg' }}
           output-dir: 'dist/basic/'
@@ -54,7 +54,7 @@ jobs:
 
       - name: Generate multiple PNG sizes (parallel processing)
         id: performance
-        uses: ./.github/actions/svg-converter
+        uses: ./
         with:
           svg-path: ${{ github.event.inputs.svg_file || 'assets/logo.svg' }}
           output-dir: 'dist/performance/'
@@ -80,7 +80,7 @@ jobs:
 
       - name: Generate TypeScript React components
         id: typescript
-        uses: ./.github/actions/svg-converter
+        uses: ./
         with:
           svg-path: ${{ github.event.inputs.svg_file || 'assets/logo.svg' }}
           output-dir: 'dist/typescript/'
@@ -107,7 +107,7 @@ jobs:
 
       - name: Generate comprehensive favicon set
         id: favicon
-        uses: ./.github/actions/svg-converter
+        uses: ./
         with:
           svg-path: ${{ github.event.inputs.svg_file || 'assets/logo.svg' }}
           output-dir: 'dist/favicon/'
@@ -158,7 +158,7 @@ jobs:
 
       - name: Test with valid input
         id: valid
-        uses: ./.github/actions/svg-converter
+        uses: ./
         with:
           svg-path: ${{ github.event.inputs.svg_file || 'assets/logo.svg' }}
           output-dir: 'dist/security/'
@@ -169,7 +169,7 @@ jobs:
       - name: Test error handling (invalid sizes)
         id: invalid
         continue-on-error: true
-        uses: ./.github/actions/svg-converter
+        uses: ./
         with:
           svg-path: ${{ github.event.inputs.svg_file || 'assets/logo.svg' }}
           output-dir: 'dist/security/'

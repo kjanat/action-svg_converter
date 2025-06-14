@@ -3,7 +3,7 @@ FROM node:22-alpine
 # Set metadata
 LABEL maintainer="poo-tracker"
 LABEL description="SVG Converter Pro - Convert SVG files to multiple formats"
-LABEL version="1.0.0"
+LABEL version="1.0.1"
 
 # Install system dependencies for image conversion and enhanced script features
 # Use imagemagick6 for better compatibility, or imagemagick for v7
