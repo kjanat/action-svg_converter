@@ -7,14 +7,35 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     labels:
       - "dependencies"
+    groups:
+      all:
+        patterns:
+          - "*"
 
   # Maintain dependencies for Docker
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: "daily"
+      interval: "weekly"
     labels:
       - "dependencies"
+    groups:
+      all:
+        patterns:
+          - "*"
+
+  # Maintain dependencies for pnpm
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+    package-manager: "pnpm"
+    groups:
+      all:
+        patterns:
+          - "*"

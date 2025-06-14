@@ -11,6 +11,21 @@ LABEL version="${VERSION}"
 # Copy VERSION file for runtime reference
 COPY VERSION /tmp/VERSION
 
+# Copy package files
+COPY package.json pnpm-lock.yaml* /app/
+
+# Install node dependencies
+RUN apk add --no-cache \
+    curl \
+    ca-certificates
+
+# Enable and prepare pnpm via Corepack (uses the official release)
+RUN corepack enable \
+    && corepack prepare pnpm@$(node -p "require('./package.json').packageManager.split('@')[1]") --activate
+
+# Install Node.js dependencies globally with specific compatible version
+RUN cd /app && pnpm install --frozen-lockfile
+
 # Install system dependencies for image conversion and enhanced script features
 # Use imagemagick6 for better compatibility, or imagemagick for v7
 RUN apk add --no-cache \
@@ -21,39 +36,49 @@ RUN apk add --no-cache \
     coreutils \
     findutils \
     inkscape \
+    # Font dependencies
     fontconfig \
     ttf-liberation \
     ttf-dejavu \
     freetype \
+    # Pango and HarfBuzz dependencies
     pango \
     pango-dev \
     harfbuzz \
     harfbuzz-dev \
+    # X11 and GTK dependencies for Inkscape
     gtk+3.0 \
     xorg-server \
+    # Font rendering libraries
     cairo \
     cairo-dev \
+    # Microsoft fonts installer
     msttcorefonts-installer
 
-# Install fonts
-RUN update-ms-fonts \
+# Set up font configuration and install fonts
+RUN set -e \
+    && echo "Installing Microsoft TrueType Core Fonts..." \
+    && update-ms-fonts \
+    && echo "Updating font cache..." \
     && fc-cache -f \
+    && echo "Setting up font configuration..." \
     && mkdir -p /etc/fonts/conf.d \
-    && ln -s /usr/share/fontconfig/conf.avail/10-sub-pixel-rgb.conf /etc/fonts/conf.d/ \
-    && ln -s /usr/share/fontconfig/conf.avail/11-lcdfilter-default.conf /etc/fonts/conf.d/ \
-    && fc-cache -f -v
-
-# Install Node.js dependencies globally with specific compatible version
-RUN npm install -g @svgr/cli@8.1.0
+    && cd /etc/fonts/conf.d \
+    && echo "Configuring subpixel rendering..." \
+    && [ ! -f 10-sub-pixel-rgb.conf ] && ln -s /usr/share/fontconfig/conf.avail/10-sub-pixel-rgb.conf . || true \
+    && [ ! -f 11-lcdfilter-default.conf ] && ln -s /usr/share/fontconfig/conf.avail/11-lcdfilter-default.conf . || true \
+    && echo "Rebuilding font cache..." \
+    && fc-cache -f -v \
+    && echo "Font installation and configuration completed."
 
 # Create non-root user for security
 RUN addgroup -g 1001 -S svguser && \
     adduser -S svguser -u 1001 -G svguser
 
-# Create working directories and give access to font cache
+# Create working directories and set permissions
 RUN mkdir -p /app /tmp/svg-converter /github/workspace && \
     chown -R svguser:svguser /app /tmp/svg-converter /github/workspace && \
-    # Give access to font cache directories
+    # Font directories
     mkdir -p /usr/share/fonts /var/cache/fontconfig && \
     chown -R svguser:svguser /usr/share/fonts /var/cache/fontconfig
 
@@ -70,7 +95,7 @@ USER svguser
 # Set working directory
 WORKDIR /github/workspace
 
-# Set environment variables for Inkscape and font configuration
+# Set environment variables for font configuration
 ENV FONTCONFIG_PATH=/etc/fonts \
     PANGOCAIRO_BACKEND=fc
 

@@ -2,6 +2,8 @@
 
 A powerful, secure, and high-performance GitHub Action that converts SVG files to multiple formats including ICO, PNG, React components, and React Native components with extensive customization options.
 
+[![🎨 SVG Converter - Enhanced Demo](https://github.com/kjanat/svg-converter-action/actions/workflows/svg-converter-demo.yml/badge.svg)](https://github.com/kjanat/svg-converter-action/actions/workflows/svg-converter-demo.yml)
+
 ## ✨ Features
 
 - **🎯 Multi-format support**: ICO, PNG, React JS, React Native JS
