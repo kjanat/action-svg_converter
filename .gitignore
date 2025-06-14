@@ -1,2 +1,9 @@
+# Ignore node_modules directory
+node_modules/
+
+# Ignore backup files
 *.bak
-assets/fonts/
+
+# Ignore everything in assets/ except logo.svg
+assets/
+!assets/logo.svg

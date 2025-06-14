@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Full font support for Inkscape rendering (including Microsoft TrueType core fonts)
+- Pango and HarfBuzz text rendering libraries
+- Font configuration for high-quality text rendering
+- Environment variables for consistent font handling
+
+### Fixed
+
+- Missing text in output images due to missing font dependencies
+- Font rendering issues in SVG to PNG/ICO conversion
+- Pango font mapping errors in Docker container
+
 ## [1.0.6] - 2025-06-15
 
 ### Added
