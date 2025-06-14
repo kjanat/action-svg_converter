@@ -18,7 +18,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Convert SVG to multiple formats
-  uses: ./.github/actions/svg-converter
+  uses: kjanat/svg-converter-action@v1.0.5
   with:
     svg-path: "assets/logo.svg"
     output-dir: "dist/"
@@ -52,7 +52,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Convert logo to all formats
-  uses: ./.github/actions/svg-converter
+  uses: kjanat/svg-converter-action@v1.0.5
   with:
     svg-path: "branding/logo.svg"
     output-dir: "assets/"
@@ -62,7 +62,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Generate multiple PNG sizes with parallel processing
-  uses: ./.github/actions/svg-converter
+  uses: kjanat/svg-converter-action@v1.0.5
   with:
     svg-path: "icons/icon.svg"
     formats: "png,ico"
@@ -74,7 +74,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Generate TypeScript React components
-  uses: ./.github/actions/svg-converter
+  uses: kjanat/svg-converter-action@v1.0.5
   with:
     svg-path: "icons/user.svg"
     formats: "react,react-native"
@@ -87,7 +87,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Convert with debug output
-  uses: ./.github/actions/svg-converter
+  uses: kjanat/svg-converter-action@v1.0.5
   with:
     svg-path: "assets/logo.svg"
     debug: "true"
@@ -98,7 +98,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Generate comprehensive favicon set
-  uses: ./.github/actions/svg-converter
+  uses: kjanat/svg-converter-action@v1.0.5
   with:
     svg-path: "branding/favicon.svg"
     formats: "ico,png"
@@ -130,7 +130,7 @@ jobs:
 
       - name: Convert SVG Assets
         id: convert
-        uses: ./.github/actions/svg-converter
+        uses: kjanat/svg-converter-action@v1.0.5
         with:
           svg-path: "assets/logo.svg"
           output-dir: "public/assets/"

@@ -270,7 +270,7 @@ jobs:
           echo "- **Memory Usage**: 40% reduction through optimized temp file handling" >> $GITHUB_STEP_SUMMARY
           echo "- **Error Recovery**: 90% faster failure detection and reporting" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✨ **SVG Converter v$(cat VERSION)** - Enterprise-grade SVG conversion! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "✨ **SVG Converter v$(tr -d '\n\r ' <./VERSION)** - Enterprise-grade SVG conversion! 🚀" >> $GITHUB_STEP_SUMMARY
 
       - name: Archive all generated assets
         uses: actions/upload-artifact@v4

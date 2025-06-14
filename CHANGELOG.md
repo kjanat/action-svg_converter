@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Version sync scripts (Bash and PowerShell) to synchronize version numbers across all project files
+- Scripts directory with comprehensive documentation
+
+### Changed
+
+- Changed the repository name from "action-svg_converter" to "svg-converter-action"
+- Updated README to reflect new repository name and usage instructions
+- Updated all README.md usage examples to use correct repository reference (`kjanat/svg-converter-action@v1.0.6`)
+- Fixed action path references from local `./.github/actions/svg-converter` to proper marketplace format
+
+### Fixed
+
+- Docker LABEL version command substitution (replaced invalid `$(cat /tmp/VERSION)` with proper ARG/LABEL pattern)
+- Version mismatches across project files (now all synced to v1.0.6)
+
+### Removed
+
+- Obsolete SETUP_INSTRUCTIONS.md file (no longer needed for standalone action repository)
+
 ## [1.0.5] - 2025-06-14
 
 ### Added
@@ -97,12 +118,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic cleanup of temporary files
 - Enhanced documentation and examples
 
-[unreleased]: https://github.com/action-svg_converter/compare/v1.0.5...HEAD
-[1.0.5]: https://github.com/action-svg_converter/compare/v1.0.4...v1.0.5
-[1.0.4]: https://github.com/action-svg_converter/compare/v1.0.3...v1.0.4
-[1.0.3]: https://github.com/action-svg_converter/compare/v1.0.2...v1.0.3
-[1.0.2]: https://github.com/action-svg_converter/compare/v1.0.1...v1.0.2
-[1.0.1]: https://github.com/action-svg_converter/compare/v1.0.0...v1.0.1
-[1.0.0]: https://github.com/action-svg_converter/releases/tag/v1.0.0
+[unreleased]: https://github.com/kjanat/svg-converter-action/compare/v1.0.5...HEAD
+[1.0.5]: https://github.com/kjanat/svg-converter-action/compare/v1.0.4...v1.0.5
+[1.0.4]: https://github.com/kjanat/svg-converter-action/compare/v1.0.3...v1.0.4
+[1.0.3]: https://github.com/kjanat/svg-converter-action/compare/v1.0.2...v1.0.3
+[1.0.2]: https://github.com/kjanat/svg-converter-action/compare/v1.0.1...v1.0.2
+[1.0.1]: https://github.com/kjanat/svg-converter-action/compare/v1.0.0...v1.0.1
+[1.0.0]: https://github.com/kjanat/svg-converter-action/releases/tag/v1.0.0
 
 <!-- markdownlint-configure-file { "MD024": false } -->
