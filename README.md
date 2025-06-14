@@ -266,7 +266,14 @@ Perfect for maintaining consistent, high-quality branding assets across web, mob
 
 ## 📈 Changelog
 
-### v1.0.2 (Latest)
+### v1.0.3 (Latest)
+
+- 🔧 Fixed workflow input handling for different trigger types (push vs workflow_dispatch)
+- ✅ Updated workflow to use `inputs.svg_file` instead of `github.event.inputs.svg_file`
+- 📍 Resolved empty SVG_PATH issue when workflow triggered by push events
+- 🎯 Improved input parameter reliability across all workflow trigger scenarios
+
+### v1.0.2
 
 - 🔧 Fixed environment variable handling for GitHub Actions inputs with hyphens
 - ✅ Updated `get_input` function to properly convert hyphens to underscores (GitHub Actions convention)
