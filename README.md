@@ -9,7 +9,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 - **🔒 Security-first**: Input validation, path traversal protection, and safe processing
 - **🎛️ Highly configurable**: Custom sizes, TypeScript support, multiple PNGs
 - **📝 Smart naming**: Auto-detects names or uses custom base names
-- **🎨 Professional logging**: Colored output with clear progress indicators and debug mode
+- **🎨 Professional logging**: Colored output with clear progress indicators and debug mode (auto-disables if color isn't supported or `NO_COLOR` is set)
 - **📊 Comprehensive outputs**: JSON array of created files and detailed summaries
 - **🛡️ Robust error handling**: Graceful failure handling with detailed error messages
 - **♻️ Clean operations**: Automatic cleanup of temporary files

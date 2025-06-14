@@ -20,12 +20,39 @@ SCRIPT_NAME="$(basename "$0")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Colors for output
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly BLUE='\033[0;34m'
-readonly BOLD='\033[1m'
-readonly NC='\033[0m' # No Color
+# ANSI color codes (disabled if unsupported)
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Detect color support
+supports_color() {
+    if [[ -n "${NO_COLOR:-}" ]]; then
+        return 1
+    fi
+
+    if [[ -t 1 ]] && command -v tput >/dev/null 2>&1; then
+        local colors
+        colors=$(tput colors)
+        [[ -n "$colors" && $colors -ge 8 ]] && return 0
+    fi
+
+    return 1
+}
+
+if ! supports_color; then
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    BOLD=''
+    NC=''
+fi
+
+readonly RED GREEN YELLOW BLUE BOLD NC
 
 # Configuration constants
 readonly MAX_SIZE=8192
