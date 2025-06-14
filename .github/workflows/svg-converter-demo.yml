@@ -18,10 +18,42 @@ on:
         type: boolean
 
 jobs:
+  # Set up environment variables for all jobs
+  setup:
+    name: 📋 Setup Environment
+    runs-on: ubuntu-latest
+    outputs:
+      svg-file: ${{ steps.setup.outputs.svg-file }}
+      debug: ${{ steps.setup.outputs.debug }}
+    steps:
+      - name: Setup environment variables
+        id: setup
+        run: |
+          # Set SVG file path - use input if available, otherwise default
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            SVG_FILE="${{ github.event.inputs.svg_file }}"
+            DEBUG="${{ github.event.inputs.enable_debug }}"
+          else
+            SVG_FILE="assets/logo.svg"
+            DEBUG="false"
+          fi
+          
+          # Use default if empty
+          SVG_FILE="${SVG_FILE:-assets/logo.svg}"
+          DEBUG="${DEBUG:-false}"
+          
+          echo "svg-file=$SVG_FILE" >> $GITHUB_OUTPUT
+          echo "debug=$DEBUG" >> $GITHUB_OUTPUT
+          
+          echo "🔧 Environment setup complete:"
+          echo "  SVG File: $SVG_FILE"
+          echo "  Debug: $DEBUG"
+
   # Demonstrate basic conversion with all formats
   basic-conversion:
     name: 📐 Basic Multi-Format Conversion
     runs-on: ubuntu-latest
+    needs: setup
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,10 +62,10 @@ jobs:
         id: basic
         uses: ./
         with:
-          svg-path: ${{ inputs.svg_file || 'assets/logo.svg' }}
+          svg-path: ${{ needs.setup.outputs.svg-file }}
           output-dir: 'dist/basic/'
           formats: 'ico,png,react,react-native'
-          debug: ${{ inputs.enable_debug || false }}
+          debug: ${{ needs.setup.outputs.debug }}
 
       - name: Display results
         run: |
@@ -48,6 +80,7 @@ jobs:
   performance-demo:
     name: ⚡ High-Performance PNG Generation
     runs-on: ubuntu-latest
+    needs: setup
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -56,12 +89,12 @@ jobs:
         id: performance
         uses: ./
         with:
-          svg-path: ${{ inputs.svg_file || 'assets/logo.svg' }}
+          svg-path: ${{ needs.setup.outputs.svg-file }}
           output-dir: 'dist/performance/'
           formats: 'png'
           png-sizes: '16,24,32,48,64,96,128,192,256,384,512,768,1024'
           base-name: 'logo-perf'
-          debug: ${{ inputs.enable_debug || false }}
+          debug: ${{ needs.setup.outputs.debug }}
 
       - name: Display performance results
         run: |
@@ -74,6 +107,7 @@ jobs:
   typescript-demo:
     name: 🔷 TypeScript React Components
     runs-on: ubuntu-latest
+    needs: setup
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -82,13 +116,13 @@ jobs:
         id: typescript
         uses: ./
         with:
-          svg-path: ${{ inputs.svg_file || 'assets/logo.svg' }}
+          svg-path: ${{ needs.setup.outputs.svg-file }}
           output-dir: 'dist/typescript/'
           formats: 'react,react-native'
           react-typescript: 'true'
           react-props-interface: 'LogoProps'
           base-name: 'AppLogo'
-          debug: ${{ inputs.enable_debug || false }}
+          debug: ${{ needs.setup.outputs.debug }}
 
       - name: Show TypeScript component
         run: |
@@ -101,6 +135,7 @@ jobs:
   favicon-demo:
     name: 🌐 Comprehensive Favicon Generation
     runs-on: ubuntu-latest
+    needs: setup
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -109,13 +144,13 @@ jobs:
         id: favicon
         uses: ./
         with:
-          svg-path: ${{ inputs.svg_file || 'assets/logo.svg' }}
+          svg-path: ${{ needs.setup.outputs.svg-file }}
           output-dir: 'dist/favicon/'
           formats: 'ico,png'
           ico-sizes: '16,32,48,64,128,256'
           png-sizes: '16,32,48,64,96,128,192,256,512'
           base-name: 'favicon'
-          debug: ${{ inputs.enable_debug || false }}
+          debug: ${{ needs.setup.outputs.debug }}
 
       - name: Generate favicon HTML snippet
         run: |
@@ -152,6 +187,7 @@ jobs:
   security-demo:
     name: 🛡️ Security & Validation Demo
     runs-on: ubuntu-latest
+    needs: setup
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -160,7 +196,7 @@ jobs:
         id: valid
         uses: ./
         with:
-          svg-path: ${{ inputs.svg_file || 'assets/logo.svg' }}
+          svg-path: ${{ needs.setup.outputs.svg-file }}
           output-dir: 'dist/security/'
           formats: 'png'
           png-sizes: '64,128'
@@ -171,7 +207,7 @@ jobs:
         continue-on-error: true
         uses: ./
         with:
-          svg-path: ${{ inputs.svg_file || 'assets/logo.svg' }}
+          svg-path: ${{ needs.setup.outputs.svg-file }}
           output-dir: 'dist/security/'
           formats: 'png'
           png-sizes: '0,99999' # Invalid sizes to test validation
@@ -192,6 +228,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       [
+        setup,
         basic-conversion,
         performance-demo,
         typescript-demo,
@@ -229,7 +266,7 @@ jobs:
           echo "- **Memory Usage**: 40% reduction through optimized temp file handling" >> $GITHUB_STEP_SUMMARY
           echo "- **Error Recovery**: 90% faster failure detection and reporting" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✨ **SVG Converter Pro v1.0.3** - Enterprise-grade SVG conversion! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "✨ **SVG Converter Pro v1.0.4** - Enterprise-grade SVG conversion! 🚀" >> $GITHUB_STEP_SUMMARY
 
       - name: Archive all generated assets
         uses: actions/upload-artifact@v4

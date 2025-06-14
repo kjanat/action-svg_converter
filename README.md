@@ -266,7 +266,15 @@ Perfect for maintaining consistent, high-quality branding assets across web, mob
 
 ## 📈 Changelog
 
-### v1.0.3 (Latest)
+### v1.0.4 (Latest)
+
+- 🔧 Completely restructured workflow to properly handle push vs workflow_dispatch triggers
+- ✅ Added dedicated setup job to centralize environment variable handling
+- 📍 Resolved persistent empty SVG_PATH issue by using job outputs instead of direct input references
+- 🎯 Implemented robust fallback mechanism that works for all trigger scenarios
+- 🚀 All demo jobs now use `needs.setup.outputs` for reliable input handling
+
+### v1.0.3
 
 - 🔧 Fixed workflow input handling for different trigger types (push vs workflow_dispatch)
 - ✅ Updated workflow to use `inputs.svg_file` instead of `github.event.inputs.svg_file`

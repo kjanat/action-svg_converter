@@ -15,7 +15,7 @@
 set -euo pipefail
 
 # Version and script info
-readonly VERSION="1.0.3"
+readonly VERSION="1.0.4"
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
