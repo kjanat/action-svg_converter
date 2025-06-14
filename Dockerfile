@@ -1,4 +1,4 @@
-FROM node:22-alpine
+FROM node:24-alpine
 
 # Build argument for version (can be overridden during build)
 ARG VERSION=1.0.5
