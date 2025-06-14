@@ -15,7 +15,7 @@
 set -euo pipefail
 
 # Version and script info
-readonly VERSION="1.0.1"
+readonly VERSION="1.0.2"
 SCRIPT_NAME="$(basename "$0")"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
@@ -119,7 +119,8 @@ EOF
 get_input() {
     local key="$1"
     local default_value="${2:-}"
-    local env_var="INPUT_${key}"
+    # GitHub Actions converts hyphens to underscores in environment variables
+    local env_var="INPUT_${key//-/_}"
 
     # Use parameter expansion to safely get the value
     local value="${!env_var:-}"
@@ -206,10 +207,12 @@ get_validated_inputs() {
     BASE_NAME=$(get_input 'BASE-NAME' '')
     REACT_TYPESCRIPT=$(get_input 'REACT-TYPESCRIPT' 'false')
     REACT_PROPS_INTERFACE=$(get_input 'REACT-PROPS-INTERFACE' 'SVGProps')
+    DEBUG=$(get_input 'DEBUG' 'false')
 
     # Validate inputs
     validate_safe_string "$FORMATS" '[a-z,\-]+' "formats" || return 1
     validate_safe_string "$REACT_TYPESCRIPT" '(true|false)' "REACT_TYPESCRIPT" || return 1
+    validate_safe_string "$DEBUG" '(true|false)' "DEBUG" || return 1
     validate_safe_string "$REACT_PROPS_INTERFACE" '[A-Za-z][A-Za-z0-9_]*' "REACT_PROPS_INTERFACE" || return 1
 
     if [[ -n "$BASE_NAME" ]]; then
@@ -224,7 +227,7 @@ get_validated_inputs() {
     OUTPUT_DIR=$(validate_path "$OUTPUT_DIR" "output") || return 1
 
     # Make variables readonly
-    readonly SVG_PATH OUTPUT_DIR FORMATS PNG_SIZES ICO_SIZES BASE_NAME REACT_TYPESCRIPT REACT_PROPS_INTERFACE
+    readonly SVG_PATH OUTPUT_DIR FORMATS PNG_SIZES ICO_SIZES BASE_NAME REACT_TYPESCRIPT REACT_PROPS_INTERFACE DEBUG
 }
 
 # Validate required inputs

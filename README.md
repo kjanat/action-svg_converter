@@ -266,7 +266,14 @@ Perfect for maintaining consistent, high-quality branding assets across web, mob
 
 ## 📈 Changelog
 
-### v1.0.1 (Latest)
+### v1.0.2 (Latest)
+
+- 🔧 Fixed environment variable handling for GitHub Actions inputs with hyphens
+- ✅ Updated `get_input` function to properly convert hyphens to underscores (GitHub Actions convention)
+- 🐛 Added missing DEBUG input variable handling and validation
+- 📍 Resolved "invalid variable name" bash errors for hyphenated input names
+
+### v1.0.1
 
 - 🔧 Fixed GitHub Actions workflow path references
 - ✅ Corrected action usage from `./.github/actions/svg-converter` to `./`
