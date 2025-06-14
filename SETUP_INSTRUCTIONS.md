@@ -1,13 +1,13 @@
-# Setup Instructions for Enhanced SVG Converter Pro
+# Setup Instructions for Enhanced SVG Converter
 
 ## Files Overview
 
-To set up the enhanced SVG Converter Pro GitHub Action, you need these files in your repository:
+To set up the enhanced SVG Converter GitHub Action, you need these files in your repository:
 
 ```tree
 .github/actions/svg-converter/
 ├── action.yml      # Action configuration
-├── Dockerfile      # Container definition  
+├── Dockerfile      # Container definition
 ├── entrypoint.sh   # Enhanced conversion script (from artifact)
 └── README.md       # Documentation
 ```
@@ -21,7 +21,7 @@ To set up the enhanced SVG Converter Pro GitHub Action, you need these files in 
    ```
 
 2. **Copy the enhanced script:**
-   Copy the "Enhanced SVG Converter Pro" script from the artifacts and save it as `entrypoint.sh` in the action directory.
+   Copy the "Enhanced SVG Converter" script from the artifacts and save it as `entrypoint.sh` in the action directory.
 
 3. **Copy the configuration files:**
    Copy the enhanced `action.yml`, `Dockerfile`, and `README.md` files to the action directory.
@@ -39,8 +39,8 @@ To set up the enhanced SVG Converter Pro GitHub Action, you need these files in 
    - name: Test SVG Converter
      uses: ./.github/actions/svg-converter
      with:
-       svg-path: 'test.svg'
-       debug: 'true'
+       svg-path: "test.svg"
+       debug: "true"
    ```
 
 ## File Permissions
@@ -65,7 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Create test SVG
         run: |
           mkdir -p test-assets
@@ -75,19 +75,19 @@ jobs:
             <text x="32" y="38" text-anchor="middle" fill="white" font-family="Arial" font-size="20">✓</text>
           </svg>
           EOF
-      
+
       - name: Convert SVG
         uses: ./.github/actions/svg-converter
         with:
-          svg-path: 'test-assets/test.svg'
-          output-dir: 'test-output/'
-          formats: 'png,ico'
-          debug: 'true'
-      
+          svg-path: "test-assets/test.svg"
+          output-dir: "test-output/"
+          formats: "png,ico"
+          debug: "true"
+
       - name: Check outputs
         run: |
           ls -la test-output/
-          echo "✅ SVG Converter Pro setup successful!"
+          echo "✅ SVG Converter setup successful!"
 ```
 
 ## Troubleshooting
@@ -113,8 +113,8 @@ Enable debug mode to see detailed processing information:
 ```yaml
 - uses: ./.github/actions/svg-converter
   with:
-    svg-path: 'your-file.svg'
-    debug: 'true'  # Enables detailed logging
+    svg-path: "your-file.svg"
+    debug: "true" # Enables detailed logging
 ```
 
 ## Security Notes
@@ -122,7 +122,7 @@ Enable debug mode to see detailed processing information:
 The enhanced version includes several security improvements:
 
 - ✅ Input validation and sanitization
-- ✅ Path traversal protection  
+- ✅ Path traversal protection
 - ✅ File size limits (10MB max)
 - ✅ Non-root container execution
 - ✅ Secure temporary file handling

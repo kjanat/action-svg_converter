@@ -1,4 +1,4 @@
-name: 🎨 SVG Converter Pro - Enhanced Demo
+name: 🎨 SVG Converter - Enhanced Demo
 
 permissions:
   contents: read
@@ -7,16 +7,16 @@ permissions:
 on:
   push:
     paths:
-      - 'assets/**/*.svg'
-      - '.github/workflows/svg-converter-demo.yml'
+      - "assets/**/*.svg"
+      - ".github/workflows/svg-converter-demo.yml"
   workflow_dispatch:
     inputs:
       svg_file:
-        description: 'SVG file path to convert'
+        description: "SVG file path to convert"
         required: false
-        default: 'assets/logo.svg'
+        default: "assets/logo.svg"
       enable_debug:
-        description: 'Enable debug output'
+        description: "Enable debug output"
         required: false
         default: false
         type: boolean
@@ -41,14 +41,14 @@ jobs:
             SVG_FILE="assets/logo.svg"
             DEBUG="false"
           fi
-          
+
           # Use default if empty
           SVG_FILE="${SVG_FILE:-assets/logo.svg}"
           DEBUG="${DEBUG:-false}"
-          
+
           echo "svg-file=$SVG_FILE" >> $GITHUB_OUTPUT
           echo "debug=$DEBUG" >> $GITHUB_OUTPUT
-          
+
           echo "🔧 Environment setup complete:"
           echo "  SVG File: $SVG_FILE"
           echo "  Debug: $DEBUG"
@@ -67,8 +67,8 @@ jobs:
         uses: ./
         with:
           svg-path: ${{ needs.setup.outputs.svg-file }}
-          output-dir: 'dist/basic/'
-          formats: 'ico,png,react,react-native'
+          output-dir: "dist/basic/"
+          formats: "ico,png,react,react-native"
           debug: ${{ needs.setup.outputs.debug }}
 
       - name: Display results
@@ -94,10 +94,10 @@ jobs:
         uses: ./
         with:
           svg-path: ${{ needs.setup.outputs.svg-file }}
-          output-dir: 'dist/performance/'
-          formats: 'png'
-          png-sizes: '16,24,32,48,64,96,128,192,256,384,512,768,1024'
-          base-name: 'logo-perf'
+          output-dir: "dist/performance/"
+          formats: "png"
+          png-sizes: "16,24,32,48,64,96,128,192,256,384,512,768,1024"
+          base-name: "logo-perf"
           debug: ${{ needs.setup.outputs.debug }}
 
       - name: Display performance results
@@ -121,11 +121,11 @@ jobs:
         uses: ./
         with:
           svg-path: ${{ needs.setup.outputs.svg-file }}
-          output-dir: 'dist/typescript/'
-          formats: 'react,react-native'
-          react-typescript: 'true'
-          react-props-interface: 'LogoProps'
-          base-name: 'AppLogo'
+          output-dir: "dist/typescript/"
+          formats: "react,react-native"
+          react-typescript: "true"
+          react-props-interface: "LogoProps"
+          base-name: "AppLogo"
           debug: ${{ needs.setup.outputs.debug }}
 
       - name: Show TypeScript component
@@ -149,11 +149,11 @@ jobs:
         uses: ./
         with:
           svg-path: ${{ needs.setup.outputs.svg-file }}
-          output-dir: 'dist/favicon/'
-          formats: 'ico,png'
-          ico-sizes: '16,32,48,64,128,256'
-          png-sizes: '16,32,48,64,96,128,192,256,512'
-          base-name: 'favicon'
+          output-dir: "dist/favicon/"
+          formats: "ico,png"
+          ico-sizes: "16,32,48,64,128,256"
+          png-sizes: "16,32,48,64,96,128,192,256,512"
+          base-name: "favicon"
           debug: ${{ needs.setup.outputs.debug }}
 
       - name: Generate favicon HTML snippet
@@ -201,10 +201,10 @@ jobs:
         uses: ./
         with:
           svg-path: ${{ needs.setup.outputs.svg-file }}
-          output-dir: 'dist/security/'
-          formats: 'png'
-          png-sizes: '64,128'
-          debug: 'true'
+          output-dir: "dist/security/"
+          formats: "png"
+          png-sizes: "64,128"
+          debug: "true"
 
       - name: Test error handling (invalid sizes)
         id: invalid
@@ -212,9 +212,9 @@ jobs:
         uses: ./
         with:
           svg-path: ${{ needs.setup.outputs.svg-file }}
-          output-dir: 'dist/security/'
-          formats: 'png'
-          png-sizes: '0,99999' # Invalid sizes to test validation
+          output-dir: "dist/security/"
+          formats: "png"
+          png-sizes: "0,99999" # Invalid sizes to test validation
 
       - name: Show security results
         run: |
@@ -246,16 +246,16 @@ jobs:
 
       - name: Create comprehensive summary
         run: |
-          echo "# 🎨 SVG Converter Pro - Enhanced Demo Results" >> $GITHUB_STEP_SUMMARY
+          echo "# 🎨 SVG Converter - Enhanced Demo Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 🎯 Demo Job Results" >> $GITHUB_STEP_SUMMARY
-          echo "| Job | Status | Description |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|-------------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Basic Conversion | ${{ needs.basic-conversion.result }} | Multi-format SVG conversion |" >> $GITHUB_STEP_SUMMARY
-          echo "| Performance Demo | ${{ needs.performance-demo.result }} | Parallel PNG processing |" >> $GITHUB_STEP_SUMMARY
-          echo "| TypeScript Demo | ${{ needs.typescript-demo.result }} | React/React Native TS components |" >> $GITHUB_STEP_SUMMARY
-          echo "| Favicon Demo | ${{ needs.favicon-demo.result }} | Comprehensive favicon generation |" >> $GITHUB_STEP_SUMMARY
-          echo "| Security Demo | ${{ needs.security-demo.result }} | Input validation & error handling |" >> $GITHUB_STEP_SUMMARY
+          echo "| Job              | Status                               | Description                       |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------------|--------------------------------------|-----------------------------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Basic Conversion | ${{ needs.basic-conversion.result }} | Multi-format SVG conversion       |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance Demo | ${{ needs.performance-demo.result }} | Parallel PNG processing           |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript Demo  | ${{ needs.typescript-demo.result }}  | React/React Native TS components  |" >> $GITHUB_STEP_SUMMARY
+          echo "| Favicon Demo     | ${{ needs.favicon-demo.result }}     | Comprehensive favicon generation  |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Demo    | ${{ needs.security-demo.result }}    | Input validation & error handling |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 🚀 Key Features Demonstrated" >> $GITHUB_STEP_SUMMARY
           echo "- ⚡ **Parallel Processing**: Multiple PNG sizes generated concurrently" >> $GITHUB_STEP_SUMMARY
@@ -270,7 +270,7 @@ jobs:
           echo "- **Memory Usage**: 40% reduction through optimized temp file handling" >> $GITHUB_STEP_SUMMARY
           echo "- **Error Recovery**: 90% faster failure detection and reporting" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "✨ **SVG Converter Pro v1.0.4** - Enterprise-grade SVG conversion! 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "✨ **SVG Converter v$(cat VERSION)** - Enterprise-grade SVG conversion! 🚀" >> $GITHUB_STEP_SUMMARY
 
       - name: Archive all generated assets
         uses: actions/upload-artifact@v4

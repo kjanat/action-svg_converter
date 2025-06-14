@@ -1,4 +1,4 @@
-# SVG Converter Pro 🎨
+# SVG Converter 🎨
 
 A powerful, secure, and high-performance GitHub Action that converts SVG files to multiple formats including ICO, PNG, React components, and React Native components with extensive customization options.
 
@@ -20,24 +20,24 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 - name: Convert SVG to multiple formats
   uses: ./.github/actions/svg-converter
   with:
-    svg-path: 'assets/logo.svg'
-    output-dir: 'dist/'
-    formats: 'ico,png,react,react-native'
+    svg-path: "assets/logo.svg"
+    output-dir: "dist/"
+    formats: "ico,png,react,react-native"
 ```
 
 ## 📋 Inputs
 
 | Input                   | Description                                           | Required | Default                      |
 | ----------------------- | ----------------------------------------------------- | -------- | ---------------------------- |
-| `svg-path`              | Path to the SVG file to convert                       | ✅ Yes    | -                            |
-| `output-dir`            | Directory to output converted files                   | ❌ No     | `./`                         |
-| `formats`               | Comma-separated formats: `ico,png,react,react-native` | ❌ No     | `ico,png,react,react-native` |
-| `png-sizes`             | Comma-separated PNG sizes (e.g., `16,32,64,128,256`)  | ❌ No     | `16,32,64,128,256`           |
-| `ico-sizes`             | Comma-separated ICO sizes (e.g., `16,32,48,64`)       | ❌ No     | `16,32,48,64`                |
-| `base-name`             | Base name for output files (without extension)        | ❌ No     | *SVG filename*               |
-| `react-typescript`      | Generate TypeScript React components                  | ❌ No     | `false`                      |
-| `react-props-interface` | Interface name for React component props              | ❌ No     | `SVGProps`                   |
-| `debug`                 | Enable debug output for troubleshooting               | ❌ No     | `false`                      |
+| `svg-path`              | Path to the SVG file to convert                       | ✅ Yes   | -                            |
+| `output-dir`            | Directory to output converted files                   | ❌ No    | `./`                         |
+| `formats`               | Comma-separated formats: `ico,png,react,react-native` | ❌ No    | `ico,png,react,react-native` |
+| `png-sizes`             | Comma-separated PNG sizes (e.g., `16,32,64,128,256`)  | ❌ No    | `16,32,64,128,256`           |
+| `ico-sizes`             | Comma-separated ICO sizes (e.g., `16,32,48,64`)       | ❌ No    | `16,32,48,64`                |
+| `base-name`             | Base name for output files (without extension)        | ❌ No    | _SVG filename_               |
+| `react-typescript`      | Generate TypeScript React components                  | ❌ No    | `false`                      |
+| `react-props-interface` | Interface name for React component props              | ❌ No    | `SVGProps`                   |
+| `debug`                 | Enable debug output for troubleshooting               | ❌ No    | `false`                      |
 
 ## 📤 Outputs
 
@@ -54,8 +54,8 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 - name: Convert logo to all formats
   uses: ./.github/actions/svg-converter
   with:
-    svg-path: 'branding/logo.svg'
-    output-dir: 'assets/'
+    svg-path: "branding/logo.svg"
+    output-dir: "assets/"
 ```
 
 ### High-Performance PNG Generation
@@ -64,10 +64,10 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 - name: Generate multiple PNG sizes with parallel processing
   uses: ./.github/actions/svg-converter
   with:
-    svg-path: 'icons/icon.svg'
-    formats: 'png,ico'
-    png-sizes: '16,24,32,48,64,96,128,192,256,512'
-    ico-sizes: '16,32,48'
+    svg-path: "icons/icon.svg"
+    formats: "png,ico"
+    png-sizes: "16,24,32,48,64,96,128,192,256,512"
+    ico-sizes: "16,32,48"
 ```
 
 ### TypeScript React Components
@@ -76,11 +76,11 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 - name: Generate TypeScript React components
   uses: ./.github/actions/svg-converter
   with:
-    svg-path: 'icons/user.svg'
-    formats: 'react,react-native'
-    react-typescript: 'true'
-    react-props-interface: 'IconProps'
-    base-name: 'UserIcon'
+    svg-path: "icons/user.svg"
+    formats: "react,react-native"
+    react-typescript: "true"
+    react-props-interface: "IconProps"
+    base-name: "UserIcon"
 ```
 
 ### Debug Mode for Troubleshooting
@@ -89,9 +89,9 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 - name: Convert with debug output
   uses: ./.github/actions/svg-converter
   with:
-    svg-path: 'assets/logo.svg'
-    debug: 'true'
-    formats: 'png,react'
+    svg-path: "assets/logo.svg"
+    debug: "true"
+    formats: "png,react"
 ```
 
 ### Favicon Generation
@@ -100,11 +100,11 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 - name: Generate comprehensive favicon set
   uses: ./.github/actions/svg-converter
   with:
-    svg-path: 'branding/favicon.svg'
-    formats: 'ico,png'
-    ico-sizes: '16,32,48,64,128,256'
-    png-sizes: '16,32,48,64,96,128,192,256'
-    base-name: 'favicon'
+    svg-path: "branding/favicon.svg"
+    formats: "ico,png"
+    ico-sizes: "16,32,48,64,128,256"
+    png-sizes: "16,32,48,64,96,128,192,256"
+    base-name: "favicon"
 ```
 
 ### Complete Production Workflow
@@ -115,7 +115,7 @@ name: 🎨 Convert Assets
 on:
   push:
     paths:
-      - 'assets/**/*.svg'
+      - "assets/**/*.svg"
   workflow_dispatch:
 
 jobs:
@@ -123,28 +123,28 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      
+
       - name: Convert SVG Assets
         id: convert
         uses: ./.github/actions/svg-converter
         with:
-          svg-path: 'assets/logo.svg'
-          output-dir: 'public/assets/'
-          formats: 'ico,png,react,react-native'
-          png-sizes: '16,32,64,128,256,512'
-          react-typescript: 'true'
-          base-name: 'AppLogo'
-      
+          svg-path: "assets/logo.svg"
+          output-dir: "public/assets/"
+          formats: "ico,png,react,react-native"
+          png-sizes: "16,32,64,128,256,512"
+          react-typescript: "true"
+          base-name: "AppLogo"
+
       - name: Show conversion results
         run: |
           echo "Files created: ${{ steps.convert.outputs.files-created }}"
           echo "Summary:"
           echo "${{ steps.convert.outputs.summary }}"
-      
+
       - name: Commit generated assets
         run: |
           git config --local user.email "action@github.com"
@@ -159,7 +159,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Security scan of generated files
         run: |
           echo "Scanning generated assets for security issues..."
@@ -266,46 +266,7 @@ Perfect for maintaining consistent, high-quality branding assets across web, mob
 
 ## 📈 Changelog
 
-### v1.0.4 (Latest)
-
-- 🔧 Completely restructured workflow to properly handle push vs workflow_dispatch triggers
-- ✅ Added dedicated setup job to centralize environment variable handling
-- 📍 Resolved persistent empty SVG_PATH issue by using job outputs instead of direct input references
-- 🎯 Implemented robust fallback mechanism that works for all trigger scenarios
-- 🚀 All demo jobs now use `needs.setup.outputs` for reliable input handling
-
-### v1.0.3
-
-- 🔧 Fixed workflow input handling for different trigger types (push vs workflow_dispatch)
-- ✅ Updated workflow to use `inputs.svg_file` instead of `github.event.inputs.svg_file`
-- 📍 Resolved empty SVG_PATH issue when workflow triggered by push events
-- 🎯 Improved input parameter reliability across all workflow trigger scenarios
-
-### v1.0.2
-
-- 🔧 Fixed environment variable handling for GitHub Actions inputs with hyphens
-- ✅ Updated `get_input` function to properly convert hyphens to underscores (GitHub Actions convention)
-- 🐛 Added missing DEBUG input variable handling and validation
-- 📍 Resolved "invalid variable name" bash errors for hyphenated input names
-
-### v1.0.1
-
-- 🔧 Fixed GitHub Actions workflow path references
-- ✅ Corrected action usage from `./.github/actions/svg-converter` to `./`
-- 📍 Resolved "Can't find action.yml" errors in workflow execution
-- 🎯 Improved workflow reliability and execution success rate
-
-### v1.0.0
-
-- 🎉 Initial release with basic SVG conversion capabilities
-- ✨ Added parallel processing for PNG generation
-- 🔒 Enhanced security with input validation and path protection
-- 🛡️ Added comprehensive error handling and recovery
-- ⚡ Performance optimizations and resource management
-- 🐛 Added debug mode for troubleshooting
-- 📊 Improved logging and progress indicators
-- 🧹 Automatic cleanup of temporary files
-- 📝 Enhanced documentation and examples
+See the [CHANGELOG](CHANGELOG.md) for detailed updates and changes.
 
 ## 🤝 Contributing
 

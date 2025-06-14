@@ -1,5 +1,5 @@
 #!/bin/bash
-# SVG Converter Pro - Enhanced Version
+# SVG Converter - Enhanced Version
 #
 # This script converts SVG files to multiple formats with configurable options:
 #   - ICO (multi-resolution favicons)
@@ -15,9 +15,24 @@
 set -euo pipefail
 
 # Version and script info
-readonly VERSION="1.0.4"
+readonly VERSION="1.0.5"
 SCRIPT_NAME="$(basename "$0")"
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Configuration constants
+readonly MAX_SIZE=8192
+readonly MIN_SIZE=8
+readonly MAX_FILES=100
+readonly TEMP_DIR="/tmp/svg-converter-$$"
+
+# Global variables
+declare -a CREATED_FILES=()
+declare -a CONVERSION_SUMMARY=()
+declare -a TEMP_FILES=()
+SVG_CONVERTER="" # Will be set by check_dependencies
+
+# Set readonly variables
+readonly SCRIPT_NAME
 
 # Colors for output
 # ANSI color codes (disabled if unsupported)
@@ -53,21 +68,6 @@ if ! supports_color; then
 fi
 
 readonly RED GREEN YELLOW BLUE BOLD NC
-
-# Configuration constants
-readonly MAX_SIZE=8192
-readonly MIN_SIZE=8
-readonly MAX_FILES=100
-readonly TEMP_DIR="/tmp/svg-converter-$$"
-
-# Global variables
-declare -a CREATED_FILES=()
-declare -a CONVERSION_SUMMARY=()
-declare -a TEMP_FILES=()
-SVG_CONVERTER="" # Will be set by check_dependencies
-
-# Set readonly variables
-readonly SCRIPT_NAME SCRIPT_DIR
 
 # Cleanup function for trap
 cleanup() {
@@ -259,8 +259,13 @@ get_validated_inputs() {
     validate_sizes "$ICO_SIZES" "ICO" || return 1
 
     # Validate and sanitize paths
-    SVG_PATH=$(validate_path "$SVG_PATH" "input") || return 1
+
+    ## Append trailing slash to output directory if not present
+    if [[ "$OUTPUT_DIR" != */ ]]; then
+        OUTPUT_DIR="${OUTPUT_DIR}/"
+    fi
     OUTPUT_DIR=$(validate_path "$OUTPUT_DIR" "output") || return 1
+    SVG_PATH=$(validate_path "$SVG_PATH" "input") || return 1
 
     # Make variables readonly
     readonly SVG_PATH OUTPUT_DIR FORMATS PNG_SIZES ICO_SIZES BASE_NAME REACT_TYPESCRIPT REACT_PROPS_INTERFACE DEBUG
@@ -307,9 +312,9 @@ validate_inputs() {
     fi
 
     log_success "Input validation passed"
-    log_debug "SVG_PATH: $SVG_PATH"
+    log_debug "SVG_PATH:   $SVG_PATH"
     log_debug "OUTPUT_DIR: $OUTPUT_DIR"
-    log_debug "FORMATS: $FORMATS"
+    log_debug "FORMATS:    $FORMATS"
 }
 
 # Check if required tools are available
@@ -411,8 +416,8 @@ convert_svg_to_png() {
 # Convert SVG to ICO format
 convert_to_ico() {
     local base_name="$1"
-    local output_file="$OUTPUT_DIR/${base_name}.ico"
-    local tmp_png="$TEMP_DIR/${base_name}_temp.png"
+    local output_file="${OUTPUT_DIR}${base_name}.ico"
+    local tmp_png="${TEMP_DIR}/${base_name}_temp.png"
 
     log_step "Converting to ICO format..."
 
@@ -459,7 +464,6 @@ convert_to_png() {
     log_step "Converting to PNG format(s)..."
 
     IFS=',' read -ra SIZES <<<"$PNG_SIZES"
-    local failed_conversions=0
 
     # Process sizes in parallel (up to 4 concurrent jobs)
     local max_jobs=4
@@ -467,7 +471,7 @@ convert_to_png() {
 
     for size in "${SIZES[@]}"; do
         size=$(echo "$size" | tr -d '[:space:]')
-        local output_file="$OUTPUT_DIR/${base_name}_${size}x${size}.png"
+        local output_file="${OUTPUT_DIR}${base_name}_${size}x${size}.png"
 
         # Wait if we've reached max concurrent jobs
         while ((current_jobs >= max_jobs)); do
@@ -505,7 +509,7 @@ convert_to_react() {
         extension="tsx"
     fi
 
-    output_file="$OUTPUT_DIR/${base_name}.${extension}"
+    output_file="${OUTPUT_DIR}${base_name}.${extension}"
 
     log_step "Converting to React component..."
 
@@ -535,7 +539,7 @@ convert_to_react() {
     fi
 
     # Convert SVG to React component
-    if ! svgr "${svgr_args[@]}" "$SVG_PATH" > "$output_file"; then
+    if ! svgr "${svgr_args[@]}" "$SVG_PATH" >"$output_file"; then
         log_error "Failed to create React component"
         return 1
     fi
@@ -555,7 +559,7 @@ convert_to_react_native() {
         extension="tsx"
     fi
 
-    output_file="$OUTPUT_DIR/${base_name}.native.${extension}"
+    output_file="${OUTPUT_DIR}${base_name}.native.${extension}"
 
     log_step "Converting to React Native component..."
 
@@ -585,7 +589,7 @@ convert_to_react_native() {
     fi
 
     # Convert SVG to React Native component
-    if ! svgr "${svgr_args[@]}" "$SVG_PATH" > "$output_file"; then
+    if ! svgr "${svgr_args[@]}" "$SVG_PATH" >"$output_file"; then
         log_error "Failed to create React Native component"
         return 1
     fi
@@ -593,6 +597,76 @@ convert_to_react_native() {
     CREATED_FILES+=("$output_file")
     CONVERSION_SUMMARY+=("React Native: $output_file (TypeScript: $REACT_TYPESCRIPT)")
     log_success "Created React Native component: $output_file"
+}
+
+# Count total files that will be created
+count_total_files() {
+    local total_files=0
+
+    # Parse requested formats
+    IFS=',' read -ra FORMAT_ARRAY <<<"$FORMATS"
+
+    for format in "${FORMAT_ARRAY[@]}"; do
+        format=$(echo "$format" | tr -d '[:space:]')
+        case "$format" in
+        ico)
+            total_files=$((total_files + 1)) # 1 ICO file
+            ;;
+        png)
+            # Count PNG sizes
+            IFS=',' read -ra PNG_ARRAY <<<"$PNG_SIZES"
+            total_files=$((total_files + ${#PNG_ARRAY[@]}))
+            ;;
+        react)
+            total_files=$((total_files + 1)) # 1 React component file
+            ;;
+        react-native)
+            total_files=$((total_files + 1)) # 1 React Native component file
+            ;;
+        esac
+    done
+
+    echo "$total_files"
+}
+
+# Validate file count against MAX_FILES limit
+validate_file_count() {
+    log_step "Validating file count limits..."
+
+    local total_files
+    total_files=$(count_total_files)
+
+    if ((total_files > MAX_FILES)); then
+        log_error "Too many files would be created: $total_files (max: $MAX_FILES)"
+        log_error "Reduce the number of PNG sizes or formats to stay within the limit"
+        return 1
+    fi
+
+    log_success "File count validation passed: $total_files files will be created (max: $MAX_FILES)"
+    log_debug "File breakdown by format:"
+
+    # Show breakdown if debug is enabled
+    if [[ "${DEBUG:-false}" == "true" ]]; then
+        IFS=',' read -ra FORMAT_ARRAY <<<"$FORMATS"
+        for format in "${FORMAT_ARRAY[@]}"; do
+            format=$(echo "$format" | tr -d '[:space:]')
+            case "$format" in
+            ico)
+                log_debug "  ICO: 1 file"
+                ;;
+            png)
+                IFS=',' read -ra PNG_ARRAY <<<"$PNG_SIZES"
+                log_debug "  PNG: ${#PNG_ARRAY[@]} files (sizes: $PNG_SIZES)"
+                ;;
+            react)
+                log_debug "  React: 1 file"
+                ;;
+            react-native)
+                log_debug "  React Native: 1 file"
+                ;;
+            esac
+        done
+    fi
 }
 
 # Set GitHub Actions outputs
@@ -631,7 +705,7 @@ main() {
         exit 0
     fi
 
-    log_info "🎨 SVG Converter Pro v$VERSION - Starting conversion..."
+    log_info "🎨 SVG Converter v$VERSION - Starting conversion..."
 
     # Get and validate inputs
     if ! get_validated_inputs; then
@@ -640,6 +714,10 @@ main() {
     fi
 
     if ! validate_inputs; then
+        exit 1
+    fi
+
+    if ! validate_file_count; then
         exit 1
     fi
 
