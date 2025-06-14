@@ -576,7 +576,7 @@ set_outputs() {
         local summary_text
 
         # Convert array to JSON
-        files_json=$(printf '%s\n' "${CREATED_FILES[@]}" | jq -R . | jq -s .)
+        files_json=$(printf '%s\n' "${CREATED_FILES[@]}" | jq -R . | jq -s -c .)
 
         # Create summary text
         summary_text=$(printf "Converted %s to %d files:\n%s" "$SVG_PATH" "${#CREATED_FILES[@]}" "$(printf '%s\n' "${CONVERSION_SUMMARY[@]}")")
