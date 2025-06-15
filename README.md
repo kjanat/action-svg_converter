@@ -111,6 +111,8 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ### Complete Production Workflow
 
+See a demo of the [complete production workflow](https://github.com/kjanat/demo-svg-converter-action/actions/workflows/demo.yml) for a complete example, in the [kjanat/demo-svg-converter-action](https://github.com/kjanat/demo-svg-converter-action) repo.
+
 ```yaml
 name: 🎨 Convert Assets
 
@@ -149,8 +151,8 @@ jobs:
 
       - name: Commit generated assets
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git config --local user.name github-actions[bot]
           git add public/assets/
           git diff --staged --quiet || git commit -m "🎨 Auto-generate assets from SVG"
           git push
