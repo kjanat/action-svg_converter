@@ -45,14 +45,14 @@ Both scripts update the following files:
 
 ```bash
 # Update version
-echo "1.0.7" > VERSION
+echo "1.0.8" > VERSION
 
 # Sync version across files
 bash scripts/sync-version.sh
 
 # Commit changes
 git add .
-git commit -m "🔖 Bump version to 1.0.7"
-git tag v1.0.7
+git commit -m "🔖 Bump version to 1.0.8"
+git tag v1.0.8
 git push origin main --tags
 ```

@@ -20,7 +20,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Convert SVG to multiple formats
-  uses: kjanat/svg-converter-action@v1.0.6
+  uses: kjanat/svg-converter-action@v1.0.7
   with:
     svg-path: "assets/logo.svg"
     output-dir: "dist/"
@@ -54,7 +54,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Convert logo to all formats
-  uses: kjanat/svg-converter-action@v1.0.6
+  uses: kjanat/svg-converter-action@v1.0.7
   with:
     svg-path: "branding/logo.svg"
     output-dir: "assets/"
@@ -64,7 +64,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Generate multiple PNG sizes with parallel processing
-  uses: kjanat/svg-converter-action@v1.0.6
+  uses: kjanat/svg-converter-action@v1.0.7
   with:
     svg-path: "icons/icon.svg"
     formats: "png,ico"
@@ -76,7 +76,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Generate TypeScript React components
-  uses: kjanat/svg-converter-action@v1.0.6
+  uses: kjanat/svg-converter-action@v1.0.7
   with:
     svg-path: "icons/user.svg"
     formats: "react,react-native"
@@ -89,7 +89,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Convert with debug output
-  uses: kjanat/svg-converter-action@v1.0.6
+  uses: kjanat/svg-converter-action@v1.0.7
   with:
     svg-path: "assets/logo.svg"
     debug: "true"
@@ -100,7 +100,7 @@ A powerful, secure, and high-performance GitHub Action that converts SVG files t
 
 ```yaml
 - name: Generate comprehensive favicon set
-  uses: kjanat/svg-converter-action@v1.0.6
+  uses: kjanat/svg-converter-action@v1.0.7
   with:
     svg-path: "branding/favicon.svg"
     formats: "ico,png"
@@ -132,7 +132,7 @@ jobs:
 
       - name: Convert SVG Assets
         id: convert
-        uses: kjanat/svg-converter-action@v1.0.6
+        uses: kjanat/svg-converter-action@v1.0.7
         with:
           svg-path: "assets/logo.svg"
           output-dir: "public/assets/"
@@ -276,4 +276,4 @@ Contributions are welcome! Please ensure all changes maintain the security and p
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the [MIT License](LICENSE).

@@ -7,27 +7,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] - 2025-06-15
+
 ### Added
 
-- Full font support for Inkscape rendering (including Microsoft TrueType core fonts)
-- Pango and HarfBuzz text rendering libraries
-- Font configuration for high-quality text rendering
-- Environment variables for consistent font handling
-- Configuration for pnpm package manager with Docker and CI/CD improvements
-  - `.dockerignore` and `.prettierignore` files for better build and formatting exclusions
-  - `package.json` and `pnpm-lock.yaml` for consistent dependency management
-- README workflow badge for CI/CD visibility
+- Lightweight Alpine-based Docker image (`Dockerfile-alpine`) for faster builds and smaller image size
+- Enhanced Inkscape environment initialization with proper configuration directories
+- Additional GTK and CSS dependencies (libgtk2.0-dev, libglib2.0-dev, libgconf-2-4) for better GUI support
+- Minimal CSS configuration file for Inkscape to prevent parsing errors and warnings
+- Comprehensive environment variables to suppress GTK and font-related warnings
+- Inkscape preferences.xml initialization to prevent runtime warnings
+- Enhanced error filtering for cleaner Inkscape output (filters non-critical warnings)
+- Alpine-specific entrypoint script (`entrypoint-alpine.sh`) optimized for lightweight containers
+- Support for both full (Ubuntu-based) and lightweight (Alpine-based) Docker images
 
 ### Changed
 
-- Updated Dockerfile to use pnpm for dependency management and enhanced font setup
-- Adjusted Dependabot update schedules to weekly with pnpm support
+- Action now uses Alpine-based Docker image by default for improved performance
+- Restructured Docker user creation to use `-m` flag for proper home directory setup
+- Enhanced directory permissions setup with proper ownership and access modes
+- Improved Inkscape configuration with better error suppression and warning filtering
+- Updated environment variable configuration for better compatibility across different systems
+- Enhanced font cache initialization and configuration
 
 ### Fixed
 
-- Missing text in output images due to missing font dependencies
-- Font rendering issues in SVG to PNG/ICO conversion
-- Pango font mapping errors in Docker container
+- Inkscape warnings and errors related to CSS parsing, font-optical-sizing, and GtkRecentManager
+- Directory permission issues in Docker containers
+- Inkscape configuration warnings on first run
+- Font rendering inconsistencies across different container environments
+- GTK-related warnings and configuration errors
 
 ## [1.0.6] - 2025-06-15
 
@@ -151,7 +160,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Automatic cleanup of temporary files
 - Enhanced documentation and examples
 
-[unreleased]: https://github.com/kjanat/svg-converter-action/compare/v1.0.6...HEAD
+[unreleased]: https://github.com/kjanat/svg-converter-action/compare/v1.0.7...HEAD
+[1.0.7]: https://github.com/kjanat/svg-converter-action/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/kjanat/svg-converter-action/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/kjanat/svg-converter-action/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/kjanat/svg-converter-action/compare/v1.0.3...v1.0.4

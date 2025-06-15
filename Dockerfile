@@ -1,7 +1,7 @@
 FROM node:24-slim
 
 # Build argument for version (can be overridden during build)
-ARG VERSION=1.0.6
+ARG VERSION=1.0.7
 
 # Set metadata
 LABEL maintainer="kjanat" \

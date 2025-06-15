@@ -16,7 +16,7 @@
 set -euo pipefail
 
 # Version and script info
-readonly VERSION="1.0.6"
+readonly VERSION="1.0.7"
 SCRIPT_NAME="$(basename "$0")"
 
 # Configuration constants
