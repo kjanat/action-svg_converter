@@ -121,15 +121,15 @@ ${BOLD}USAGE:${NC}
     $SCRIPT_NAME [OPTIONS]
 
 ${BOLD}ENVIRONMENT VARIABLES:${NC}
-    INPUT_SVG-PATH          Path to input SVG file (required)
-    INPUT_OUTPUT-DIR        Output directory (default: ./)
-    INPUT_FORMATS           Comma-separated formats: ico,png,react,react-native (default: ico,png,react,react-native)
-    INPUT_PNG-SIZES         Comma-separated PNG sizes (default: 16,32,64,128,256)
-    INPUT_ICO-SIZES         Comma-separated ICO sizes (default: 16,32,48,64)
-    INPUT_BASE-NAME         Base name for output files (default: SVG filename)
-    INPUT_REACT-TYPESCRIPT  Generate TypeScript files (default: false)
+    INPUT_SVG-PATH               Path to input SVG file (required)
+    INPUT_OUTPUT-DIR             Output directory (default: ./)
+    INPUT_FORMATS                Comma-separated formats: ico,png,react,react-native (default: ico,png,react,react-native)
+    INPUT_PNG-SIZES              Comma-separated PNG sizes (default: 16,32,64,128,256)
+    INPUT_ICO-SIZES              Comma-separated ICO sizes (default: 16,32,48,64)
+    INPUT_BASE-NAME              Base name for output files (default: SVG filename)
+    INPUT_REACT-TYPESCRIPT       Generate TypeScript files (default: false)
     INPUT_REACT-PROPS-INTERFACE  Props interface name (default: SVGProps)
-    DEBUG                   Enable debug output (default: false)
+    DEBUG                        Enable debug output (default: false)
 
 ${BOLD}EXAMPLES:${NC}
     # Basic usage

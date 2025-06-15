@@ -13,6 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pango and HarfBuzz text rendering libraries
 - Font configuration for high-quality text rendering
 - Environment variables for consistent font handling
+- Configuration for pnpm package manager with Docker and CI/CD improvements
+  - `.dockerignore` and `.prettierignore` files for better build and formatting exclusions
+  - `package.json` and `pnpm-lock.yaml` for consistent dependency management
+- README workflow badge for CI/CD visibility
+
+### Changed
+
+- Updated Dockerfile to use pnpm for dependency management and enhanced font setup
+- Adjusted Dependabot update schedules to weekly with pnpm support
 
 ### Fixed
 

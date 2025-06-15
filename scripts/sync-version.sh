@@ -18,12 +18,14 @@ declare -A FILE_PATTERNS=(
     ["entrypoint.sh"]="readonly VERSION=\"[^\"]*\""
     ["Dockerfile"]="ARG VERSION=[^ ]*"
     ["README.md"]="kjanat/svg-converter-action@v[^\s]*"
+    ["package.json"]="\"version\": \"[^\s]*\""
 )
 
 declare -A REPLACEMENTS=(
     ["entrypoint.sh"]="readonly VERSION=\"\$VERSION\""
     ["Dockerfile"]="ARG VERSION=\$VERSION"
     ["README.md"]="kjanat/svg-converter-action@v\$VERSION"
+    ["package.json"]="\"version\": \"\$VERSION\""
 )
 
 # Functions

@@ -7,3 +7,6 @@ node_modules/
 # Ignore everything in assets/ except logo.svg
 assets/
 !assets/logo.svg
+
+# Build artifacts
+dist/

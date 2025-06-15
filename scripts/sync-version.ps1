@@ -19,12 +19,14 @@ $FilePatterns = @{
 	'entrypoint.sh' = 'readonly VERSION="[^"]*"'
 	'Dockerfile'    = 'ARG VERSION=[^ \r\n]*'
 	'README.md'     = 'uses: kjanat/svg-converter-action@v[^\s]*'
+	'package.json'  = '"version": "[^\s]*"'
 }
 
 $Replacements = @{
 	'entrypoint.sh' = { param($Version) "readonly VERSION=`"$Version`"" }
 	'Dockerfile'    = { param($Version) "ARG VERSION=$Version" }
 	'README.md'     = { param($Version) "uses: kjanat/svg-converter-action@v$Version" }
+	'package.json'  = { param($Version) """version"": ""$Version""" }
 }
 
 # Functions
@@ -59,6 +61,7 @@ function Get-ProjectPaths {
 			'entrypoint.sh' = Join-Path $projectRoot 'entrypoint.sh'
 			'Dockerfile'    = Join-Path $projectRoot 'Dockerfile'
 			'README.md'     = Join-Path $projectRoot 'README.md'
+			'package.json'  = Join-Path $projectRoot 'package.json'
 		}
 	}
 }
