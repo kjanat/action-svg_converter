@@ -18,14 +18,7 @@ RUN corepack enable
 
 # Create non-root user early for security
 RUN groupadd -g 1001 svguser && \
-    useradd -u 1001 -g svguser -s /bin/bash svguser
-
-# Create working directories and set permissions
-RUN mkdir -p /app /tmp/svg-converter /github/workspace /usr/share/fonts /var/cache/fontconfig && \
-    chown -R svguser:svguser /app /tmp/svg-converter /github/workspace /usr/share/fonts /var/cache/fontconfig && \
-    # Create Inkscape config directories to prevent warnings
-    mkdir -p /home/svguser/.config/inkscape /home/svguser/.local/share && \
-    chown -R svguser:svguser /home/svguser/.config /home/svguser/.local
+    useradd -u 1001 -g svguser -s /bin/bash -m svguser
 
 # Install all system dependencies in a single layer
 RUN apt-get update && apt-get install -y \
@@ -58,8 +51,19 @@ RUN apt-get update && apt-get install -y \
     # Font rendering libraries
     libcairo2 \
     libcairo2-dev \
+    # Additional GTK and CSS dependencies
+    libgtk2.0-dev \
+    libglib2.0-dev \
+    libgconf-2-4 \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
+
+# Create working directories and set proper permissions
+RUN mkdir -p /app /tmp/svg-converter /github/workspace /usr/share/fonts /var/cache/fontconfig \
+    /home/svguser/.config/inkscape /home/svguser/.local/share /home/svguser/.cache && \
+    chown -R svguser:svguser /app /tmp/svg-converter /github/workspace /usr/share/fonts /var/cache/fontconfig \
+    /home/svguser/.config /home/svguser/.local /home/svguser/.cache && \
+    chmod -R 755 /home/svguser/.config /home/svguser/.local /home/svguser/.cache
 
 # Install Microsoft TrueType Core Fonts in a single layer
 RUN set -e && \
@@ -93,6 +97,13 @@ RUN set -e && \
     fc-cache -f && \
     echo "Font installation completed."
 
+# Create a minimal CSS file to resolve parsing errors
+RUN mkdir -p /etc/inkscape && \
+    echo "/* Minimal CSS to prevent parsing errors */" > /etc/inkscape/default.css && \
+    echo "@namespace svg url(http://www.w3.org/2000/svg);" >> /etc/inkscape/default.css && \
+    echo "/* Suppress font-optical-sizing warnings */" >> /etc/inkscape/default.css && \
+    echo "text { font-optical-sizing: auto; }" >> /etc/inkscape/default.css
+
 # Copy package files for dependency installation
 COPY --chown=svguser:svguser package.json pnpm-lock.yaml* /app/
 
@@ -110,18 +121,34 @@ RUN chmod +x /app/entrypoint.sh
 # Switch to non-root user
 USER svguser
 
+# Initialize Inkscape configuration to prevent runtime warnings
+RUN mkdir -p /home/svguser/.config/inkscape/preferences && \
+    echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?>' > /home/svguser/.config/inkscape/preferences.xml && \
+    echo '<inkscape version="1.0" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape">' >> /home/svguser/.config/inkscape/preferences.xml && \
+    echo '  <group id="preferences" inkscape:groupmode="prefs">' >> /home/svguser/.config/inkscape/preferences.xml && \
+    echo '    <group id="misc" inkscape:groupmode="prefs">' >> /home/svguser/.config/inkscape/preferences.xml && \
+    echo '      <group id="recent" inkscape:groupmode="prefs" max="0"/>' >> /home/svguser/.config/inkscape/preferences.xml && \
+    echo '    </group>' >> /home/svguser/.config/inkscape/preferences.xml && \
+    echo '  </group>' >> /home/svguser/.config/inkscape/preferences.xml && \
+    echo '</inkscape>' >> /home/svguser/.config/inkscape/preferences.xml
+
 # Add /app/node_modules/.bin to PATH so CLI tools are available
 ENV PATH="/app/node_modules/.bin:$PATH"
 
 # Set working directory
 WORKDIR /github/workspace
 
-# Set environment variables for font configuration and suppress warnings
+# Set comprehensive environment variables to fix all warnings
 ENV FONTCONFIG_PATH=/etc/fonts \
     PANGOCAIRO_BACKEND=fc \
     XDG_CONFIG_HOME=/home/svguser/.config \
     XDG_DATA_HOME=/home/svguser/.local/share \
-    INKSCAPE_PROFILE_DIR=/home/svguser/.config/inkscape
+    XDG_CACHE_HOME=/home/svguser/.cache \
+    INKSCAPE_PROFILE_DIR=/home/svguser/.config/inkscape \
+    GTK2_RC_FILES=/dev/null \
+    GCONF_CONFIG_SOURCE="" \
+    DISPLAY=:99 \
+    INKSCAPE_DATADIR=/usr/share/inkscape
 
 # Set the entrypoint
 ENTRYPOINT ["/app/entrypoint.sh"]

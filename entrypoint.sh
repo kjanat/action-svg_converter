@@ -8,16 +8,16 @@
 #   - React Native JS components
 #
 # DEPENDENCIES:
-#   - librsvg (for rsvg-convert) OR imagemagick
 #   - @svgr/cli (for React components)
+#   - Inkscape (for SVG conversion)
 #   - jq (for JSON processing)
+#   - librsvg (for rsvg-convert) OR imagemagick
 
 set -euo pipefail
 
 # Version and script info
 readonly VERSION="1.0.6"
 SCRIPT_NAME="$(basename "$0")"
-# SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Configuration constants
 readonly MAX_SIZE=8192
@@ -35,7 +35,6 @@ SVG_CONVERTER="" # Will be set by check_dependencies
 readonly SCRIPT_NAME
 
 # Colors for output
-# ANSI color codes (disabled if unsupported)
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -68,6 +67,22 @@ if ! supports_color; then
 fi
 
 readonly RED GREEN YELLOW BLUE BOLD NC
+
+# Initialize Inkscape environment properly
+init_inkscape_env() {
+    # Ensure all required directories exist
+    mkdir -p "$XDG_CONFIG_HOME/inkscape" "$XDG_DATA_HOME" "$XDG_CACHE_HOME"
+    
+    # Create empty recent files list to prevent GtkRecentManager warnings
+    mkdir -p "$XDG_DATA_HOME/recently-used.xbel" 2>/dev/null || true
+    touch "$XDG_DATA_HOME/recently-used.xbel" 2>/dev/null || true
+    
+    # Initialize Inkscape with a dummy run to create config files
+    if command -v inkscape >/dev/null 2>&1; then
+        # Run inkscape with version check to initialize configs without processing files
+        inkscape --version >/dev/null 2>&1 || true
+    fi
+}
 
 # Cleanup function for trap
 cleanup() {
@@ -259,7 +274,6 @@ get_validated_inputs() {
     validate_sizes "$ICO_SIZES" "ICO" || return 1
 
     # Validate and sanitize paths
-
     ## Append trailing slash to output directory if not present
     if [[ "$OUTPUT_DIR" != */ ]]; then
         OUTPUT_DIR="${OUTPUT_DIR}/"
@@ -321,6 +335,9 @@ validate_inputs() {
 check_dependencies() {
     local missing_deps=()
     log_step "Checking dependencies..."
+
+    # Initialize Inkscape environment first
+    init_inkscape_env
 
     # Check for SVG conversion capability (prioritize Inkscape)
     if command -v inkscape >/dev/null 2>&1; then
@@ -391,7 +408,23 @@ convert_svg_to_png() {
 
     if [[ "$SVG_CONVERTER" == "inkscape" ]]; then
         # Inkscape provides the highest quality SVG rendering
-        if ! inkscape --export-type=png --export-width="$width" --export-height="$height" --export-filename="$output_png" "$input_svg"; then
+        # Use a subshell to capture and filter stderr
+        if ! {
+            inkscape \
+                --export-type=png \
+                --export-width="$width" \
+                --export-height="$height" \
+                --export-filename="$output_png" \
+                "$input_svg" 2>&1 | \
+            grep -v "Could not open file" | \
+            grep -v "cr_tknzr_new_from_uri" | \
+            grep -v "cr_parser_parse_file" | \
+            grep -v "import_style_cb" | \
+            grep -v "font-optical-sizing" | \
+            grep -v "GtkRecentManager" | \
+            grep -v "Failed to wrap object" | \
+            grep -E "(ERROR|CRITICAL|fatal)" || true
+        }; then
             log_error "Failed to convert SVG to PNG using Inkscape"
             return 1
         fi
