@@ -1,16 +1,22 @@
 #!/bin/bash
-# SVG Converter - Lightweight Alpine Version
+# SVG Converter - Enhanced Version
 #
 # This script converts SVG files to multiple formats with configurable options:
 #   - ICO (multi-resolution favicons)
 #   - PNG (various sizes)
 #   - React JS components
 #   - React Native JS components
+#
+# DEPENDENCIES:
+#   - @svgr/cli (for React components)
+#   - Inkscape (for SVG conversion)
+#   - jq (for JSON processing)
+#   - librsvg (for rsvg-convert) OR imagemagick
 
 set -euo pipefail
 
 # Version and script info
-readonly VERSION="1.0.6"
+readonly VERSION="1.0.7"
 SCRIPT_NAME="$(basename "$0")"
 
 # Configuration constants
@@ -44,7 +50,7 @@ supports_color() {
 
     if [[ -t 1 ]] && command -v tput >/dev/null 2>&1; then
         local colors
-        colors=$(tput colors 2>/dev/null || echo 0)
+        colors=$(tput colors)
         [[ -n "$colors" && $colors -ge 8 ]] && return 0
     fi
 
@@ -62,14 +68,19 @@ fi
 
 readonly RED GREEN YELLOW BLUE BOLD NC
 
-# Initialize lightweight environment
-init_lightweight_env() {
+# Initialize Inkscape environment properly
+init_inkscape_env() {
     # Ensure all required directories exist
-    mkdir -p "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME"
-
-    # Update font cache if needed
-    if command -v fc-cache >/dev/null 2>&1; then
-        fc-cache -f 2>/dev/null || true
+    mkdir -p "$XDG_CONFIG_HOME/inkscape" "$XDG_DATA_HOME" "$XDG_CACHE_HOME"
+    
+    # Create empty recent files list to prevent GtkRecentManager warnings
+    mkdir -p "$XDG_DATA_HOME/recently-used.xbel" 2>/dev/null || true
+    touch "$XDG_DATA_HOME/recently-used.xbel" 2>/dev/null || true
+    
+    # Initialize Inkscape with a dummy run to create config files
+    if command -v inkscape >/dev/null 2>&1; then
+        # Run inkscape with version check to initialize configs without processing files
+        inkscape --version >/dev/null 2>&1 || true
     fi
 }
 
@@ -157,7 +168,7 @@ get_input() {
     local env_var_underscore="INPUT_${key//-/_}"
     local env_var_hyphen="INPUT_${key}"
 
-    # Retrieve value from either form
+    # Retrieve value from either form (using printenv for hyphenated names)
     local value=""
     if [[ -n "${!env_var_underscore:-}" ]]; then
         value="${!env_var_underscore}"
@@ -237,7 +248,7 @@ validate_sizes() {
     done
 }
 
-# Input variables validation
+# Input variables from GitHub Actions with validation
 get_validated_inputs() {
     SVG_PATH=$(get_input 'SVG-PATH')
     OUTPUT_DIR=$(get_input 'OUTPUT-DIR' './')
@@ -263,6 +274,7 @@ get_validated_inputs() {
     validate_sizes "$ICO_SIZES" "ICO" || return 1
 
     # Validate and sanitize paths
+    ## Append trailing slash to output directory if not present
     if [[ "$OUTPUT_DIR" != */ ]]; then
         OUTPUT_DIR="${OUTPUT_DIR}/"
     fi
@@ -295,7 +307,7 @@ validate_inputs() {
 
     # Check file size (basic safety check)
     local file_size
-    file_size=$(stat -c%s "$SVG_PATH" 2>/dev/null || echo 0)
+    file_size=$(stat -f%z "$SVG_PATH" 2>/dev/null || stat -c%s "$SVG_PATH" 2>/dev/null || echo 0)
     if ((file_size > 10485760)); then # 10MB limit
         log_error "SVG file is too large (>10MB): $SVG_PATH"
         return 1
@@ -324,29 +336,34 @@ check_dependencies() {
     local missing_deps=()
     log_step "Checking dependencies..."
 
-    # Initialize lightweight environment first
-    init_lightweight_env
+    # Initialize Inkscape environment first
+    init_inkscape_env
 
-    # Check for SVG conversion capability (prioritize rsvg-convert for Alpine)
-    if command -v rsvg-convert >/dev/null 2>&1; then
-        log_info "✓ rsvg-convert found (lightweight and efficient)"
+    # Check for SVG conversion capability (prioritize Inkscape)
+    if command -v inkscape >/dev/null 2>&1; then
+        log_info "✓ Inkscape found (preferred - highest quality)"
+        SVG_CONVERTER="inkscape"
+    elif command -v rsvg-convert >/dev/null 2>&1; then
+        log_info "✓ rsvg-convert found"
         SVG_CONVERTER="rsvg-convert"
     elif command -v magick >/dev/null 2>&1; then
-        log_info "✓ ImageMagick found"
+        log_info "✓ ImageMagick v7+ found"
         SVG_CONVERTER="magick"
+
         # Test if ImageMagick can handle SVG
         if ! magick -list format | grep -q SVG; then
             log_warn "ImageMagick may not have full SVG support"
         fi
     elif command -v convert >/dev/null 2>&1; then
-        log_info "✓ ImageMagick (legacy) found"
+        log_info "✓ ImageMagick v6 found"
         SVG_CONVERTER="convert"
+
         # Test if ImageMagick can handle SVG
         if ! convert -list format | grep -q SVG; then
             log_warn "ImageMagick may not have full SVG support"
         fi
     else
-        missing_deps+=("librsvg or imagemagick")
+        missing_deps+=("inkscape, imagemagick, or librsvg")
     fi
 
     # Check other dependencies based on requested formats
@@ -389,19 +406,41 @@ convert_svg_to_png() {
 
     log_debug "Converting $input_svg to $output_png (${width}x${height}) using $SVG_CONVERTER"
 
-    if [[ "$SVG_CONVERTER" == "rsvg-convert" ]]; then
-        if ! rsvg-convert -w "$width" -h "$height" "$input_svg" -o "$output_png" 2>/dev/null; then
+    if [[ "$SVG_CONVERTER" == "inkscape" ]]; then
+        # Inkscape provides the highest quality SVG rendering
+        # Use a subshell to capture and filter stderr
+        if ! {
+            inkscape \
+                --export-type=png \
+                --export-width="$width" \
+                --export-height="$height" \
+                --export-filename="$output_png" \
+                "$input_svg" 2>&1 | \
+            grep -v "Could not open file" | \
+            grep -v "cr_tknzr_new_from_uri" | \
+            grep -v "cr_parser_parse_file" | \
+            grep -v "import_style_cb" | \
+            grep -v "font-optical-sizing" | \
+            grep -v "GtkRecentManager" | \
+            grep -v "Failed to wrap object" | \
+            grep -E "(ERROR|CRITICAL|fatal)" || true
+        }; then
+            log_error "Failed to convert SVG to PNG using Inkscape"
+            return 1
+        fi
+    elif [[ "$SVG_CONVERTER" == "rsvg-convert" ]]; then
+        if ! rsvg-convert -w "$width" -h "$height" "$input_svg" -o "$output_png"; then
             log_error "Failed to convert SVG to PNG using rsvg-convert"
             return 1
         fi
     elif [[ "$SVG_CONVERTER" == "magick" ]]; then
-        if ! magick -background transparent -size "${width}x${height}" "$input_svg" "$output_png" 2>/dev/null; then
-            log_error "Failed to convert SVG to PNG using ImageMagick"
+        if ! magick -background transparent -size "${width}x${height}" "$input_svg" "$output_png"; then
+            log_error "Failed to convert SVG to PNG using ImageMagick v7+"
             return 1
         fi
     elif [[ "$SVG_CONVERTER" == "convert" ]]; then
-        if ! convert -background transparent -size "${width}x${height}" "$input_svg" "$output_png" 2>/dev/null; then
-            log_error "Failed to convert SVG to PNG using ImageMagick (legacy)"
+        if ! convert -background transparent -size "${width}x${height}" "$input_svg" "$output_png"; then
+            log_error "Failed to convert SVG to PNG using ImageMagick v6"
             return 1
         fi
     else
@@ -429,10 +468,10 @@ convert_to_ico() {
     # Add temp file to cleanup list
     TEMP_FILES+=("$tmp_png")
 
-    # Convert SVG to high-resolution PNG first
+    # Convert SVG to high-resolution PNG first (using highest resolution for best ICO quality)
     local max_ico_size
     max_ico_size=$(echo "$ICO_SIZES" | tr ',' '\n' | sort -nr | head -n1)
-    max_ico_size=${max_ico_size:-256}
+    max_ico_size=${max_ico_size:-256} # Default to 256 if parsing fails
 
     log_debug "Creating high-res intermediate PNG for ICO: ${max_ico_size}x${max_ico_size}"
     if ! convert_svg_to_png "$SVG_PATH" "$tmp_png" "$max_ico_size" "$max_ico_size"; then
@@ -440,17 +479,17 @@ convert_to_ico() {
         return 1
     fi
 
-    # Create multi-resolution ICO using ImageMagick
+    # Create multi-resolution ICO using ImageMagick (PNG → ICO provides better quality than direct SVG → ICO)
     if command -v magick >/dev/null 2>&1; then
-        log_debug "Using ImageMagick for ICO creation with sizes: $ICO_SIZES"
-        if ! magick "$tmp_png" -define icon:auto-resize="$ICO_SIZES" "$output_file" 2>/dev/null; then
-            log_error "Failed to create ICO file using ImageMagick"
+        log_debug "Using ImageMagick v7+ for ICO creation with sizes: $ICO_SIZES"
+        if ! magick "$tmp_png" -define icon:auto-resize="$ICO_SIZES" "$output_file"; then
+            log_error "Failed to create ICO file using ImageMagick v7+"
             return 1
         fi
     elif command -v convert >/dev/null 2>&1; then
-        log_debug "Using ImageMagick (legacy) for ICO creation with sizes: $ICO_SIZES"
-        if ! convert "$tmp_png" -define icon:auto-resize="$ICO_SIZES" "$output_file" 2>/dev/null; then
-            log_error "Failed to create ICO file using ImageMagick (legacy)"
+        log_debug "Using ImageMagick v6 for ICO creation with sizes: $ICO_SIZES"
+        if ! convert "$tmp_png" -define icon:auto-resize="$ICO_SIZES" "$output_file"; then
+            log_error "Failed to create ICO file using ImageMagick v6"
             return 1
         fi
     else
@@ -470,7 +509,7 @@ convert_to_png() {
 
     IFS=',' read -ra SIZES <<<"$PNG_SIZES"
 
-    # Process sizes in parallel (limit to 4 concurrent jobs for efficiency)
+    # Process sizes in parallel (up to 4 concurrent jobs)
     local max_jobs=4
     local current_jobs=0
 
@@ -533,6 +572,7 @@ convert_to_react() {
 
     # Add props interface if specified, supported, and not default
     if [[ -n "$REACT_PROPS_INTERFACE" ]] && [[ "$REACT_PROPS_INTERFACE" != "SVGProps" ]] && [[ "$supports_props_interface" == "true" ]]; then
+        # Try different variations of the props interface option
         if svgr --help 2>/dev/null | grep -q "props-interface"; then
             svgr_args+=(--props-interface "$REACT_PROPS_INTERFACE")
         elif svgr --help 2>/dev/null | grep -q "propsInterface"; then
@@ -582,6 +622,7 @@ convert_to_react_native() {
 
     # Add props interface if specified, supported, and not default
     if [[ -n "$REACT_PROPS_INTERFACE" ]] && [[ "$REACT_PROPS_INTERFACE" != "SVGProps" ]] && [[ "$supports_props_interface" == "true" ]]; then
+        # Try different variations of the props interface option
         if svgr --help 2>/dev/null | grep -q "props-interface"; then
             svgr_args+=(--props-interface "$REACT_PROPS_INTERFACE")
         elif svgr --help 2>/dev/null | grep -q "propsInterface"; then
@@ -605,23 +646,26 @@ convert_to_react_native() {
 # Count total files that will be created
 count_total_files() {
     local total_files=0
+
+    # Parse requested formats
     IFS=',' read -ra FORMAT_ARRAY <<<"$FORMATS"
 
     for format in "${FORMAT_ARRAY[@]}"; do
         format=$(echo "$format" | tr -d '[:space:]')
         case "$format" in
         ico)
-            total_files=$((total_files + 1))
+            total_files=$((total_files + 1)) # 1 ICO file
             ;;
         png)
+            # Count PNG sizes
             IFS=',' read -ra PNG_ARRAY <<<"$PNG_SIZES"
             total_files=$((total_files + ${#PNG_ARRAY[@]}))
             ;;
         react)
-            total_files=$((total_files + 1))
+            total_files=$((total_files + 1)) # 1 React component file
             ;;
         react-native)
-            total_files=$((total_files + 1))
+            total_files=$((total_files + 1)) # 1 React Native component file
             ;;
         esac
     done
@@ -643,6 +687,30 @@ validate_file_count() {
     fi
 
     log_success "File count validation passed: $total_files files will be created (max: $MAX_FILES)"
+    log_debug "File breakdown by format:"
+
+    # Show breakdown if debug is enabled
+    if [[ "${DEBUG:-false}" == "true" ]]; then
+        IFS=',' read -ra FORMAT_ARRAY <<<"$FORMATS"
+        for format in "${FORMAT_ARRAY[@]}"; do
+            format=$(echo "$format" | tr -d '[:space:]')
+            case "$format" in
+            ico)
+                log_debug "  ICO: 1 file"
+                ;;
+            png)
+                IFS=',' read -ra PNG_ARRAY <<<"$PNG_SIZES"
+                log_debug "  PNG: ${#PNG_ARRAY[@]} files (sizes: $PNG_SIZES)"
+                ;;
+            react)
+                log_debug "  React: 1 file"
+                ;;
+            react-native)
+                log_debug "  React Native: 1 file"
+                ;;
+            esac
+        done
+    fi
 }
 
 # Set GitHub Actions outputs
@@ -681,7 +749,7 @@ main() {
         exit 0
     fi
 
-    log_info "🎨 SVG Converter v$VERSION (Lightweight) - Starting conversion..."
+    log_info "🎨 SVG Converter v$VERSION - Starting conversion..."
 
     # Get and validate inputs
     if ! get_validated_inputs; then
