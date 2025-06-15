@@ -10,3 +10,6 @@ assets/
 
 # Build artifacts
 dist/
+
+# Testing repo
+.testing_svg-converter-action/
